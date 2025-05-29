@@ -1,0 +1,83 @@
+"use client";
+
+import { createClinic } from "@/actions/clinic.actions";
+import { Button } from "@/components/ui/button";
+import { DialogFooter } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2Icon } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+const clinicFormSchema = z.object({
+  name: z.string().trim().min(2, {
+    message: "Nome é obrigatório",
+  }),
+});
+
+const ClinicForm = () => {
+  const form = useForm<z.infer<typeof clinicFormSchema>>({
+    resolver: zodResolver(clinicFormSchema),
+    defaultValues: {
+      name: "",
+    },
+  });
+
+  const onSubmit = async ({ name }: z.infer<typeof clinicFormSchema>) => {
+    try {
+      await createClinic(name);
+
+      toast.success("Clínica criada com sucesso!");
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao criar clínica!");
+    }
+  };
+
+  return (
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome</FormLabel>
+                <FormControl>
+                  <Input placeholder="Digite seu nome" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <DialogFooter>
+            <Button
+              type="submit"
+              className="w-full cursor-pointer"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                "Criar clínica"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+    </>
+  );
+};
+
+export default ClinicForm;
