@@ -19,8 +19,6 @@ const ClinicFormPage = () => {
         </DialogHeader>
 
         <ClinicForm />
-
-        
       </DialogContent>
     </Dialog>
   );
