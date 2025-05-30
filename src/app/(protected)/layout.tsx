@@ -32,10 +32,10 @@ export default function ProtectedLayout({
       >
         <SidebarProvider>
           <AppSidebar />
-          <main>
+          <main className="w-full">
             <SidebarTrigger />
             {children}
-            <Toaster position="bottom-center" richColors theme="light" />{" "}
+            <Toaster position="bottom-center" richColors theme="light" />
           </main>
         </SidebarProvider>
       </body>
