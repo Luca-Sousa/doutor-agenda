@@ -109,7 +109,7 @@ const AppSidebar = () => {
                   </Avatar>
                   <div>
                     <p className="text-sm capitalize">
-                      {session.data?.user.clinic.name}
+                      {session.data?.user?.clinic?.name}
                     </p>
                     <p className="text-muted-foreground text-sm">
                       {session.data?.user.email}

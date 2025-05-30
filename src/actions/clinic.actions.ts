@@ -25,5 +25,5 @@ export const createClinic = async (name: string) => {
     clinicId: clinic.id,
   });
 
-  redirect("/");
+  redirect("/dashboard");
 };
