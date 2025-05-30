@@ -28,10 +28,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const items = [
   {
@@ -58,6 +58,7 @@ const items = [
 
 const AppSidebar = () => {
   const router = useRouter();
+  const session = authClient.useSession();
 
   const handleSignOut = () => {
     authClient.signOut({
@@ -69,6 +70,7 @@ const AppSidebar = () => {
       },
     });
   };
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
@@ -100,11 +102,23 @@ const AppSidebar = () => {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>Clínica</Button>
+                <SidebarMenuButton size="lg">
+                  <Avatar>
+                    <AvatarFallback>L</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm capitalize">
+                      {session.data?.user.clinic.name}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {session.data?.user.email}
+                    </p>
+                  </div>
+                </SidebarMenuButton>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem onClick={handleSignOut} variant="destructive">
                   <LogOutIcon />
                   Sair
                 </DropdownMenuItem>
