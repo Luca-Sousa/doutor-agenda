@@ -11,7 +11,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { revalidatePath } from "next/cache";
 
-const requireSession = async () => {
+export const requireSession = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });

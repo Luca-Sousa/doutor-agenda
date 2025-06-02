@@ -17,6 +17,21 @@ import { CalendarIcon, ClockIcon, DollarSignIcon } from "lucide-react";
 import { getAvailability } from "@/helpers/availability";
 import { formatCurrencyInCents } from "@/helpers/currency";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2Icon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+import { deleteDoctor } from "@/actions/doctor.actions";
 
 interface DoctorCardProps {
   doctor: typeof doctorsTable.$inferSelect;
@@ -32,6 +47,23 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
 
   const availability = getAvailability(doctor);
 
+  const deleteDoctorAction = useAction(deleteDoctor, {
+    onSuccess: () => {
+      toast.success("Médico deletado com sucesso!");
+    },
+    onError: () => {
+      toast.error("Erro ao deletar o médico!");
+    },
+  });
+
+  const handleDeleteDoctorClick = () => {
+    if (!doctor) return;
+
+    deleteDoctorAction.execute({
+      id: doctor.id,
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -40,7 +72,7 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
             <AvatarFallback>{doctorInitials}</AvatarFallback>
           </Avatar>
 
-          <div>
+          <div className="flex-1">
             <h3 className="text-sm font-medium">{doctor.name}</h3>
             <p className="text-muted-foreground text-sm">{doctor.specialty}</p>
           </div>
@@ -75,10 +107,10 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
       </CardContent>
       <Separator />
 
-      <CardFooter>
+      <CardFooter className="gap-1">
         <Dialog open={isUpsertDialogOpen} onOpenChange={setIsUpsertDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full cursor-pointer">Ver detalhes</Button>
+            <Button className="flex-1 cursor-pointer">Ver detalhes</Button>
           </DialogTrigger>
 
           <UpsertDoctorForm
@@ -90,6 +122,39 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
             }}
           />
         </Dialog>
+
+        <AlertDialog>
+          <AlertDialogTrigger>
+            <Button
+              type="button"
+              size="icon"
+              variant="destructive"
+              className="cursor-pointer bg-red-500 hover:bg-red-400"
+            >
+              <Trash2Icon />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Tem certeza que deseja deletar esse médico?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Essa ação não pode ser revertida. Isso irá deletar o médico e
+                todas as consultas agendadas.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="cursor-pointer"
+                onClick={handleDeleteDoctorClick}
+              >
+                Deletar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardFooter>
     </Card>
   );

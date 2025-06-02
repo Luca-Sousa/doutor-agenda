@@ -410,7 +410,7 @@ const UpsertDoctorForm = ({ onSuccess, doctor }: UpsertDoctorFormProps) => {
               disabled={upsertDoctorAction.isPending}
             >
               {upsertDoctorAction.isPending ? (
-                <Loader2Icon className="mr-4 size-4 animate-spin" />
+                <Loader2Icon className="size-4 animate-spin" />
               ) : doctor ? (
                 <div className="flex items-center gap-2">
                   <SaveIcon /> Salvar
