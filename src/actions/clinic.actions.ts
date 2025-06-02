@@ -7,6 +7,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { upsertDoctorSchema } from "./clinic.schema";
 import { actionClient } from "@/lib/safe-action";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 
 const requireSession = async () => {
   const session = await auth.api.getSession({
@@ -30,23 +32,44 @@ export const createClinic = async (name: string) => {
   redirect("/dashboard");
 };
 
+dayjs.extend(utc);
+
 export const upsertDoctor = actionClient
   .schema(upsertDoctorSchema)
   .action(async ({ parsedInput }) => {
     const session = await requireSession();
     if (!session.user.clinic?.id) throw new Error("Clinic not Found");
 
+    const availableFromTime = parsedInput.availableFromTime;
+    const availableToTime = parsedInput.availableToTime;
+
+    const availableFromTimeUTC = dayjs()
+      .set("hour", parseInt(availableFromTime.split(":")[0]))
+      .set("minute", parseInt(availableFromTime.split(":")[1]))
+      .set("minute", parseInt(availableFromTime.split(":")[2]))
+      .utc();
+
+    const availableToTimeUTC = dayjs()
+      .set("hour", parseInt(availableToTime.split(":")[0]))
+      .set("minute", parseInt(availableToTime.split(":")[1]))
+      .set("minute", parseInt(availableToTime.split(":")[2]))
+      .utc();
+
     await db
       .insert(doctorsTable)
       .values({
+        ...parsedInput,
         id: parsedInput.id,
         clinicId: session.user.clinic.id,
-        ...parsedInput,
+        availableFromTime: availableFromTimeUTC.format("HH:mm:ss"),
+        availableToTime: availableToTimeUTC.format("HH:mm:ss"),
       })
       .onConflictDoUpdate({
         target: [doctorsTable.id],
         set: {
           ...parsedInput,
+          availableFromTime: availableFromTimeUTC.format("HH:mm:ss"),
+          availableToTime: availableToTimeUTC.format("HH:mm:ss"),
         },
       });
   });
