@@ -33,6 +33,9 @@ import { Input } from "@/components/ui/input";
 import { medicalSpecialties } from "@/contants";
 import { NumericFormat } from "react-number-format";
 import { Separator } from "@/components/ui/separator";
+import { useAction } from "next-safe-action/hooks";
+import { upsertDoctor } from "@/actions/clinic.actions";
+import { toast } from "sonner";
 
 const formSchema = z
   .object({
@@ -45,41 +48,62 @@ const formSchema = z
     appointmentPrice: z.number().min(1, {
       message: "Preço da consulta é obrigatório.",
     }),
-    avaliableFromWeekDay: z.string(),
-    avaliableToWeekDay: z.string(),
-    avaliableFromTime: z.string().min(1, {
+    availableFromWeekDay: z.string(),
+    availableToWeekDay: z.string(),
+    availableFromTime: z.string().min(1, {
       message: "Hora de ínicio é obrigatória.",
     }),
-    avaliableToTime: z.string().min(1, {
+    availableToTime: z.string().min(1, {
       message: "Hora de término é obrigatória.",
     }),
   })
   .refine(
     (data) => {
-      return data.avaliableFromTime < data.avaliableToTime;
+      return data.availableFromTime < data.availableToTime;
     },
     {
       message:
         "O horário de início não pode ser anterior ao horário de término.",
-      path: ["avaliableToTime"],
+      path: ["availableToTime"],
     },
   );
 
-const UpsertDoctorForm = () => {
+interface UpsertDoctorFormProps {
+  onSuccess?: () => void;
+}
+
+const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       specialty: "",
       appointmentPrice: 0,
-      avaliableFromWeekDay: "1",
-      avaliableToWeekDay: "5",
-      avaliableFromTime: "",
-      avaliableToTime: "",
+      availableFromWeekDay: "1",
+      availableToWeekDay: "5",
+      availableFromTime: "",
+      availableToTime: "",
     },
   });
 
-  const onSubmit = () => {};
+  const upsertDoctorAction = useAction(upsertDoctor, {
+    onSuccess: () => {
+      toast.success("Médico adicionado com sucesso!");
+      onSuccess?.();
+    },
+    onError: () => {
+      toast.error("Erro ao adcionar médico!");
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    upsertDoctorAction.execute({
+      ...values,
+      availableFromWeekDay: parseInt(values.availableFromWeekDay),
+      availableToWeekDay: parseInt(values.availableToWeekDay),
+      appointmentPriceInCents: values.appointmentPrice * 100,
+    });
+  };
 
   return (
     <DialogContent>
@@ -162,7 +186,7 @@ const UpsertDoctorForm = () => {
           <div className="flex gap-3">
             <FormField
               control={form.control}
-              name="avaliableFromWeekDay"
+              name="availableFromWeekDay"
               render={({ field }) => (
                 <FormItem className="basis-1/2">
                   <FormLabel>Dia inicial de disponibilidade</FormLabel>
@@ -192,7 +216,7 @@ const UpsertDoctorForm = () => {
 
             <FormField
               control={form.control}
-              name="avaliableToWeekDay"
+              name="availableToWeekDay"
               render={({ field }) => (
                 <FormItem className="basis-1/2">
                   <FormLabel>Dia final de disponibilidade</FormLabel>
@@ -223,7 +247,7 @@ const UpsertDoctorForm = () => {
 
           <FormField
             control={form.control}
-            name="avaliableFromTime"
+            name="availableFromTime"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Horário inicial de disponibilidade</FormLabel>
@@ -295,7 +319,7 @@ const UpsertDoctorForm = () => {
 
           <FormField
             control={form.control}
-            name="avaliableToTime"
+            name="availableToTime"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Horário final de disponibilidade</FormLabel>
@@ -369,9 +393,9 @@ const UpsertDoctorForm = () => {
             <Button
               type="submit"
               className="w-full cursor-pointer"
-              disabled={form.formState.isSubmitting}
+              disabled={upsertDoctorAction.isPending}
             >
-              {form.formState.isSubmitting ? (
+              {upsertDoctorAction.isPending ? (
                 <Loader2Icon className="mr-4 size-4 animate-spin" />
               ) : (
                 "Adicionar"

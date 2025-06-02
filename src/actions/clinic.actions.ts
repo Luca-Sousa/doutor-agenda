@@ -1,10 +1,12 @@
 "use server";
 
 import { db } from "@/db";
-import { clinicsTable, usersToClinicsTable } from "@/db/schema";
+import { clinicsTable, doctorsTable, usersToClinicsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { upsertDoctorSchema } from "./clinic.schema";
+import { actionClient } from "@/lib/safe-action";
 
 const requireSession = async () => {
   const session = await auth.api.getSession({
@@ -27,3 +29,24 @@ export const createClinic = async (name: string) => {
 
   redirect("/dashboard");
 };
+
+export const upsertDoctor = actionClient
+  .schema(upsertDoctorSchema)
+  .action(async ({ parsedInput }) => {
+    const session = await requireSession();
+    if (!session.user.clinic?.id) throw new Error("Clinic not Found");
+
+    await db
+      .insert(doctorsTable)
+      .values({
+        id: parsedInput.id,
+        clinicId: session.user.clinic.id,
+        ...parsedInput,
+      })
+      .onConflictDoUpdate({
+        target: [doctorsTable.id],
+        set: {
+          ...parsedInput,
+        },
+      });
+  });
