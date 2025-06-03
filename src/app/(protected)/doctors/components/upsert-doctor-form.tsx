@@ -1,5 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2Icon, SaveIcon, StethoscopeIcon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { NumericFormat } from "react-number-format";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { upsertDoctor } from "@/actions/clinic.actions";
 import { Button } from "@/components/ui/button";
 import {
   DialogContent,
@@ -9,6 +19,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -17,25 +36,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon, SaveIcon, StethoscopeIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Input } from "@/components/ui/input";
-import { medicalSpecialties } from "@/contants";
-import { NumericFormat } from "react-number-format";
 import { Separator } from "@/components/ui/separator";
-import { useAction } from "next-safe-action/hooks";
-import { upsertDoctor } from "@/actions/clinic.actions";
-import { toast } from "sonner";
+import { medicalSpecialties } from "@/contants";
 import { doctorsTable } from "@/db/schema";
 
 const formSchema = z
@@ -70,11 +72,16 @@ const formSchema = z
   );
 
 interface UpsertDoctorFormProps {
+  isOpen: boolean;
   doctor?: typeof doctorsTable.$inferSelect;
   onSuccess?: () => void;
 }
 
-const UpsertDoctorForm = ({ onSuccess, doctor }: UpsertDoctorFormProps) => {
+const UpsertDoctorForm = ({
+  isOpen,
+  doctor,
+  onSuccess,
+}: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     shouldUnregister: true,
     resolver: zodResolver(formSchema),
@@ -90,6 +97,22 @@ const UpsertDoctorForm = ({ onSuccess, doctor }: UpsertDoctorFormProps) => {
       availableToTime: doctor?.availableToTime ?? "",
     },
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        name: doctor?.name ?? "",
+        specialty: doctor?.specialty ?? "",
+        appointmentPrice: doctor?.appointmentPriceInCents
+          ? doctor.appointmentPriceInCents / 100
+          : 0,
+        availableFromWeekDay: doctor?.availableFromWeekDay?.toString() ?? "1",
+        availableToWeekDay: doctor?.availableToWeekDay?.toString() ?? "5",
+        availableFromTime: doctor?.availableFromTime ?? "",
+        availableToTime: doctor?.availableToTime ?? "",
+      });
+    }
+  }, [form, isOpen, doctor]);
 
   const upsertDoctorAction = useAction(upsertDoctor, {
     onSuccess: () => {
@@ -117,7 +140,7 @@ const UpsertDoctorForm = ({ onSuccess, doctor }: UpsertDoctorFormProps) => {
     <DialogContent>
       <DialogHeader>
         <DialogTitle>
-          {doctor ? `Médico: ${doctor.name}` : "Adicionar Médico"}{" "}
+          {doctor ? `Médico: ${doctor.name}` : "Adicionar Médico"}
         </DialogTitle>
         <DialogDescription>
           {doctor
@@ -417,7 +440,7 @@ const UpsertDoctorForm = ({ onSuccess, doctor }: UpsertDoctorFormProps) => {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <StethoscopeIcon /> Adicionar
+                  <StethoscopeIcon /> Adicionar Médico
                 </div>
               )}
             </Button>

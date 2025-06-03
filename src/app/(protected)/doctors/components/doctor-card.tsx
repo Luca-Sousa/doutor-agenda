@@ -1,22 +1,12 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { doctorsTable } from "@/db/schema";
-import UpsertDoctorForm from "./upsert-doctor-form";
-import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, ClockIcon, DollarSignIcon } from "lucide-react";
-import { getAvailability } from "@/helpers/availability";
-import { formatCurrencyInCents } from "@/helpers/currency";
+import { Trash2Icon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
+import { toast } from "sonner";
+
+import { deleteDoctor } from "@/actions/doctor.actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,10 +18,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Trash2Icon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
-import { deleteDoctor } from "@/actions/doctor.actions";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { doctorsTable } from "@/db/schema";
+import { getAvailability } from "@/helpers/availability";
+import { formatCurrencyInCents } from "@/helpers/currency";
+
+import UpsertDoctorForm from "./upsert-doctor-form";
 
 interface DoctorCardProps {
   doctor: typeof doctorsTable.$inferSelect;
@@ -114,6 +116,7 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
           </DialogTrigger>
 
           <UpsertDoctorForm
+            isOpen={isUpsertDialogOpen}
             onSuccess={() => setIsUpsertDialogOpen(false)}
             doctor={{
               ...doctor,
@@ -124,7 +127,7 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
         </Dialog>
 
         <AlertDialog>
-          <AlertDialogTrigger>
+          <AlertDialogTrigger asChild>
             <Button
               type="button"
               size="icon"
