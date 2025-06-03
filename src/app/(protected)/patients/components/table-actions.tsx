@@ -1,8 +1,22 @@
 "use client";
 
 import { ClipboardPenIcon, MoreVerticalIcon, Trash2Icon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
+import { toast } from "sonner";
 
+import { deletePatient } from "@/actions/patient.actions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import {
@@ -24,6 +38,20 @@ interface TableActionsProps {
 const TableActions = ({ patient }: TableActionsProps) => {
   const [upsertDialogIsOpen, setUpsertDialogIsOpen] = useState(false);
 
+  const deletePatientAction = useAction(deletePatient, {
+    onSuccess: () => {
+      toast.success("Paciente deletado com sucesso.");
+    },
+    onError: () => {
+      toast.error("Erro ao deletar paciente.");
+    },
+  });
+
+  const handleDeletePatientClick = () => {
+    if (!patient) return;
+    deletePatientAction.execute({ id: patient.id });
+  };
+
   return (
     <Dialog open={upsertDialogIsOpen} onOpenChange={setUpsertDialogIsOpen}>
       <DropdownMenu>
@@ -43,10 +71,39 @@ const TableActions = ({ patient }: TableActionsProps) => {
             <ClipboardPenIcon />
             Editar
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer">
-            <Trash2Icon />
-            Deletar
-          </DropdownMenuItem>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={(e) => e.preventDefault()}
+              >
+                <Trash2Icon />
+                Deletar
+              </DropdownMenuItem>
+            </AlertDialogTrigger>
+
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Tem certeza que deseja deletar esse paciente?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  Essa ação não pode ser revertida. Isso irá deletar o paciente
+                  e todas as consultas agendadas.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  className="cursor-pointer"
+                  onClick={handleDeletePatientClick}
+                >
+                  Deletar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </DropdownMenuContent>
       </DropdownMenu>
 
