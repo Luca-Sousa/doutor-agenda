@@ -1,15 +1,17 @@
 "use server";
 
-import { db } from "@/db";
-import { clinicsTable, doctorsTable, usersToClinicsTable } from "@/db/schema";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { upsertDoctorSchema } from "./clinic.schema";
-import { actionClient } from "@/lib/safe-action";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+import { db } from "@/db";
+import { clinicsTable, doctorsTable, usersToClinicsTable } from "@/db/schema";
+import { auth } from "@/lib/auth";
+import { actionClient } from "@/lib/safe-action";
+
+import { upsertDoctorSchema } from "./clinic.schema";
 
 export const requireSession = async () => {
   const session = await auth.api.getSession({

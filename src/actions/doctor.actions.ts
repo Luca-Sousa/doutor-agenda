@@ -1,12 +1,14 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
 import { db } from "@/db";
 import { doctorsTable } from "@/db/schema";
 import { actionClient } from "@/lib/safe-action";
-import { eq } from "drizzle-orm";
-import { z } from "zod";
+
 import { requireSession } from "./clinic.actions";
-import { revalidatePath } from "next/cache";
 
 export const deleteDoctor = actionClient
   .schema(
