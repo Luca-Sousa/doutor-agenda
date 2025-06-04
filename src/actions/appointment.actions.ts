@@ -10,6 +10,7 @@ import { appointmentsTable } from "@/db/schema";
 import { actionClient } from "@/lib/safe-action";
 
 import { addAppointmentSchema } from "./appointment.schema";
+import { getAvailableTimes } from "./available-times.actions";
 import { requireSession } from "./clinic.actions";
 
 export const addAppointment = actionClient
@@ -17,6 +18,17 @@ export const addAppointment = actionClient
   .action(async ({ parsedInput }) => {
     const session = await requireSession();
     if (!session.user.clinic?.id) throw new Error("Clinic not Found");
+
+    const availableTimes = await getAvailableTimes({
+      doctorId: parsedInput.doctorId,
+      date: dayjs(parsedInput.date).format("YYYY-MM-DD"),
+    });
+    if (!availableTimes?.data) throw new Error("No available times");
+
+    const isTimeAvailable = availableTimes.data?.some(
+      (time) => time.value === parsedInput.time && time.available,
+    );
+    if (!isTimeAvailable) throw new Error("Time not available");
 
     const appointmentDateTime = dayjs(parsedInput.date)
       .set("hour", parseInt(parsedInput.time.split(":")[0]))
