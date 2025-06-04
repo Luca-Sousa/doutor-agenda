@@ -1,6 +1,8 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 import { appointmentsTable } from "@/db/schema";
 import { formatCurrencyInCents } from "@/helpers/currency";
@@ -37,6 +39,16 @@ export const appointmentsTableColumns: ColumnDef<AppointmentWithRelations>[] = [
     header: "Médico",
     cell: ({ row: { original: appointment } }) => {
       return `${appointment.doctor.name}`;
+    },
+  },
+  {
+    id: "date",
+    accessorKey: "date",
+    header: "Data e Hora",
+    cell: ({ row: { original: appointment } }) => {
+      return format(new Date(appointment.date), "dd/MM/yyyy 'às' HH:mm", {
+        locale: ptBR,
+      });
     },
   },
   {
