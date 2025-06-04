@@ -31,5 +31,3 @@ export const upsertDoctorSchema = z
       path: ["avaliableToTime"],
     },
   );
-
-export type UpsertDoctorSchema = z.infer<typeof upsertDoctorSchema>;

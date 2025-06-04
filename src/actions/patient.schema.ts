@@ -13,5 +13,3 @@ export const upsertPatientSchema = z.object({
     required_error: "Gênero é obrigatório.",
   }),
 });
-
-export type UpsertPatientSchema = z.infer<typeof upsertPatientSchema>;
