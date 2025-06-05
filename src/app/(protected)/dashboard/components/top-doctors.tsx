@@ -1,7 +1,7 @@
 import { Stethoscope } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface TopDoctorsProps {
   doctors: {
@@ -15,15 +15,13 @@ interface TopDoctorsProps {
 
 const TopDoctors = ({ doctors }: TopDoctorsProps) => {
   return (
-    <Card className="mx-auto w-full">
-      <CardContent>
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Stethoscope className="text-muted-foreground" />
-            <CardTitle className="text-base">Médicos</CardTitle>
-          </div>
-        </div>
+    <Card>
+      <CardHeader className="mb-2 flex items-center gap-3">
+        <Stethoscope className="text-muted-foreground" />
+        <CardTitle>Médicos</CardTitle>
+      </CardHeader>
 
+      <CardContent>
         <div className="space-y-6">
           {doctors.map((doctor) => (
             <div key={doctor.id} className="flex items-center justify-between">

@@ -10,7 +10,7 @@ import {
   Stethoscope,
 } from "lucide-react";
 
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 interface TopSpecialtiesProps {
@@ -46,15 +46,13 @@ const TopSpecialties = ({ specialties }: TopSpecialtiesProps) => {
   const maxAppointments = Math.max(...specialties.map((i) => i.appointments));
 
   return (
-    <Card className="mx-auto w-full">
-      <CardContent>
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Hospital className="text-muted-foreground" />
-            <CardTitle className="text-base">Especialidades</CardTitle>
-          </div>
-        </div>
+    <Card>
+      <CardHeader className="mb-2 flex items-center gap-3">
+        <Hospital className="text-muted-foreground" />
+        <CardTitle>Especialidades</CardTitle>
+      </CardHeader>
 
+      <CardContent>
         <div className="space-y-6">
           {specialties.map((specialty) => {
             const Icon = getSpecialtyIcon(specialty.specialty);
