@@ -50,7 +50,7 @@ const StatsCards = ({
         const Icon = stat.icon;
 
         return (
-          <Card key={stat.title} className="gap-2">
+          <Card key={stat.title} className="gap-2  hover:shadow-md transition-all">
             <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-2">
               <div className="bg-primary/10 flex size-8 items-center justify-center rounded-full">
                 <Icon className="text-primary size-4" />
