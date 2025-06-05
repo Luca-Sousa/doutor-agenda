@@ -16,7 +16,7 @@ const AddPatientButton = () => {
       <DialogTrigger asChild>
         <Button className="cursor-pointer">
           <PlusIcon />
-          Adicionar Médico
+          Adicionar Paciente
         </Button>
       </DialogTrigger>
 

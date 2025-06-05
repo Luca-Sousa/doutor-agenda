@@ -2,22 +2,21 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import dayjs from "dayjs";
-import { CalendarIcon, Loader2Icon } from "lucide-react";
+import { CalendarIcon, HandCoinsIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { addAppointment } from "@/actions/appointment.actions";
 import { getAvailableTimes } from "@/actions/available-times.actions";
+import CustomFormField, {
+  FormFieldType,
+} from "@/components/form/custom-form-field";
+import SubmitButtonForm from "@/components/form/submit-button-form";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   DialogContent,
   DialogDescription,
@@ -27,27 +26,11 @@ import {
 } from "@/components/ui/dialog";
 import {
   Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { doctorsTable, patientsTable } from "@/db/schema";
-import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   patientId: z.string().min(1, {
@@ -144,6 +127,8 @@ const AddAppointmentForm = ({
     },
   });
 
+  const isLoading = createAppointmentAction.isPending;
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     createAppointmentAction.execute({
       ...values,
@@ -179,194 +164,96 @@ const AddAppointmentForm = ({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
+          <CustomFormField
             control={form.control}
+            fieldType={FormFieldType.SELECT}
             name="patientId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Paciente</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="!h-11 w-full">
-                      <SelectValue placeholder="Selecione um paciente" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {patients.map((patient) => (
-                      <SelectItem key={patient.id} value={patient.id}>
-                        <Avatar>
-                          <AvatarFallback>
-                            {patient.name
-                              .split(" ")
-                              .map((name) => name[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        {patient.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            label="Paciente"
+            placeholder="Selecione um paciente"
+          >
+            {patients.map((patient) => (
+              <SelectItem key={patient.id} value={patient.id}>
+                <Avatar>
+                  <AvatarFallback className="uppercase">
+                    {patient.name
+                      .split(" ")
+                      .map((name) => name[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                {patient.name}
+              </SelectItem>
+            ))}
+          </CustomFormField>
 
-          <FormField
+          <CustomFormField
             control={form.control}
+            fieldType={FormFieldType.SELECT}
             name="doctorId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Médico</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="!h-11 w-full">
-                      <SelectValue placeholder="Selecione um médico" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {doctors.map((doctor) => (
-                      <SelectItem key={doctor.id} value={doctor.id}>
-                        <Avatar>
-                          <AvatarFallback>
-                            {doctor.name
-                              .split(" ")
-                              .map((name) => name[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        {doctor.name} - {doctor.specialty}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            label="Médico"
+            placeholder="Selecione um médico"
+          >
+            {doctors.map((doctor) => (
+              <SelectItem key={doctor.id} value={doctor.id}>
+                <Avatar>
+                  <AvatarFallback className="uppercase">
+                    {doctor.name
+                      .split(" ")
+                      .map((name) => name[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                {doctor.name} - {doctor.specialty}
+              </SelectItem>
+            ))}
+          </CustomFormField>
 
-          <FormField
+          <CustomFormField
             control={form.control}
+            fieldType={FormFieldType.NUMERICFORMAT}
+            icon={HandCoinsIcon}
             name="appointmentPrice"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Valor da consulta</FormLabel>
-                <NumericFormat
-                  value={field.value}
-                  onValueChange={(value) => {
-                    field.onChange(value.floatValue);
-                  }}
-                  decimalScale={2}
-                  fixedDecimalScale
-                  decimalSeparator=","
-                  thousandSeparator="."
-                  prefix="R$ "
-                  allowNegative={false}
-                  disabled={!selectedDoctorId}
-                  customInput={Input}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Valor da consulta"
+            disabled={!selectedDoctorId}
           />
 
-          <FormField
+          <CustomFormField
             control={form.control}
+            fieldType={FormFieldType.POPOVERCALENDER}
+            icon={HandCoinsIcon}
             name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Data</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        disabled={!isDateTimeEnabled}
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? (
-                          format(field.value, "PPP", { locale: ptBR })
-                        ) : (
-                          <span>Selecione uma data</span>
-                        )}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date() || !isDateAvailable(date)
-                      }
-                      initialFocus
-                      locale={ptBR}
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Data"
+            disabled={!isDateTimeEnabled}
+            disabledCalendar={(date) =>
+              date < new Date() || !isDateAvailable(date)
+            }
           />
 
-          <FormField
+          <CustomFormField
             control={form.control}
+            fieldType={FormFieldType.SELECT}
             name="time"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Horário</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  disabled={!isDateTimeEnabled || !selectedDate}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione um horário" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {availableTimes?.data?.map((time) => (
-                      <SelectItem
-                        key={time.value}
-                        value={time.value}
-                        disabled={!time.available}
-                      >
-                        {time.label} {!time.available && "(Indisponível)"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            label="Horário"
+            placeholder="Selecione um horário"
+            disabled={!isDateTimeEnabled || !selectedDate}
+          >
+            {availableTimes?.data?.map((time) => (
+              <SelectItem
+                key={time.value}
+                value={time.value}
+                disabled={!time.available}
+              >
+                {time.label} {!time.available && "(Indisponível)"}
+              </SelectItem>
+            ))}
+          </CustomFormField>
 
           <DialogFooter>
-            <Button
-              type="submit"
-              className="w-full cursor-pointer"
-              disabled={createAppointmentAction.isPending}
-            >
-              {createAppointmentAction.isPending ? (
-                <Loader2Icon className="size-4 animate-spin" />
-              ) : (
-                <div className="flex items-center gap-2">
-                  <CalendarIcon /> Criar agendamento
-                </div>
-              )}
-            </Button>
+            <SubmitButtonForm isLoading={isLoading}>
+              <div className="flex items-center gap-2">
+                <CalendarIcon /> Criar agendamento
+              </div>
+            </SubmitButtonForm>
           </DialogFooter>
         </form>
       </Form>

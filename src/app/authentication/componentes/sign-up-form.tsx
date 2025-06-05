@@ -1,13 +1,16 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon } from "lucide-react";
+import { KeyIcon, MailIcon, UserPenIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
+import CustomFormField, {
+  FormFieldType,
+} from "@/components/form/custom-form-field";
+import SubmitButtonForm from "@/components/form/submit-button-form";
 import {
   Card,
   CardContent,
@@ -16,15 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { authClient } from "@/lib/auth-client";
 
 const registerSchema = z.object({
@@ -54,6 +49,8 @@ const SignUpForm = () => {
       password: "",
     },
   });
+
+  const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     await authClient.signUp.email(
@@ -89,65 +86,40 @@ const SignUpForm = () => {
           </CardHeader>
 
           <CardContent className="space-y-4">
-            <FormField
+            <CustomFormField
               control={form.control}
+              fieldType={FormFieldType.INPUT}
+              icon={UserPenIcon}
               name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Digite seu nome" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Nome"
+              placeholder="Digite seu nome"
             />
 
-            <FormField
+            <CustomFormField
               control={form.control}
+              fieldType={FormFieldType.INPUT}
+              icon={MailIcon}
               name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Digite seu email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Email"
+              typeInput="email"
+              placeholder="Digite seu email"
             />
 
-            <FormField
+            <CustomFormField
               control={form.control}
+              fieldType={FormFieldType.INPUT}
+              icon={KeyIcon}
               name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Senha</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Digite sua senha"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Senha"
+              typeInput="password"
+              placeholder="Digite sua senha"
             />
           </CardContent>
 
           <CardFooter>
-            <Button
-              type="submit"
-              className="w-full cursor-pointer"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? (
-                <Loader2Icon className="mr-4 size-4 animate-spin" />
-              ) : (
-                "Criar conta"
-              )}
-            </Button>
+            <SubmitButtonForm isLoading={isLoading}>
+              Criar conta
+            </SubmitButtonForm>
           </CardFooter>
         </form>
       </Form>

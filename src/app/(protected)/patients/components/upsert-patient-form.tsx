@@ -1,16 +1,26 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon, SaveIcon, UserIcon } from "lucide-react";
+import {
+  MailIcon,
+  MarsIcon,
+  PhoneIcon,
+  SaveIcon,
+  UserIcon,
+  UserPenIcon,
+  VenusIcon,
+} from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { PatternFormat } from "react-number-format";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { upsertPatient } from "@/actions/patient.actions";
-import { Button } from "@/components/ui/button";
+import CustomFormField, {
+  FormFieldType,
+} from "@/components/form/custom-form-field";
+import SubmitButtonForm from "@/components/form/submit-button-form";
 import {
   DialogContent,
   DialogDescription,
@@ -18,22 +28,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
+import { SelectItem } from "@/components/ui/select";
 import { patientsTable } from "@/db/schema";
 
 const formSchema = z.object({
@@ -91,6 +87,8 @@ const UpsertPatientForm = ({
     },
   });
 
+  const isLoading = upsertPatientAction.isPending;
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     upsertPatientAction.execute({
       ...values,
@@ -113,98 +111,52 @@ const UpsertPatientForm = ({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
+          <CustomFormField
             control={form.control}
+            fieldType={FormFieldType.INPUT}
+            icon={UserPenIcon}
             name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Digite o nome completo do paciente"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Nome"
+            placeholder="Digite o nome completo do paciente"
           />
 
-          <FormField
+          <CustomFormField
             control={form.control}
+            fieldType={FormFieldType.INPUT}
+            icon={MailIcon}
             name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="exemplo@email.com"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Email"
+            typeInput="email"
+            placeholder="exemplo@gmail.com"
           />
 
-          <FormField
+          <CustomFormField
             control={form.control}
+            fieldType={FormFieldType.PHONE_INPUT}
+            icon={PhoneIcon}
             name="phoneNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Número de telefone</FormLabel>
-                <FormControl>
-                  <PatternFormat
-                    format="(##) #####-####"
-                    mask="_"
-                    placeholder="(11) 99999-9999"
-                    value={field.value}
-                    onValueChange={(value) => {
-                      field.onChange(value.value);
-                    }}
-                    customInput={Input}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Número de telefone"
+            placeholder="(11) 99999-9999"
           />
 
-          <FormField
+          <CustomFormField
             control={form.control}
+            fieldType={FormFieldType.SELECT}
             name="gender"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Gênero</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione o gênero" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="male">Masculino</SelectItem>
-                    <SelectItem value="female">Feminino</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            label="Gênero"
+            placeholder="Selecione o gênero"
+          >
+            <SelectItem value="male">
+              <MarsIcon className="size-5 text-primary/70" /> Masculino
+            </SelectItem>
+            <SelectItem value="female">
+              <VenusIcon className="size-5 text-primary/70" /> Feminino
+            </SelectItem>
+          </CustomFormField>
 
           <DialogFooter>
-            <Button
-              type="submit"
-              className="w-full cursor-pointer"
-              disabled={upsertPatientAction.isPending}
-            >
-              {upsertPatientAction.isPending ? (
-                <Loader2Icon className="size-4 animate-spin" />
-              ) : patient ? (
+            <SubmitButtonForm isLoading={isLoading}>
+              {patient ? (
                 <div className="flex items-center gap-2">
                   <SaveIcon /> Salvar
                 </div>
@@ -213,7 +165,7 @@ const UpsertPatientForm = ({
                   <UserIcon /> Adicionar Paciente
                 </div>
               )}
-            </Button>
+            </SubmitButtonForm>
           </DialogFooter>
         </form>
       </Form>
