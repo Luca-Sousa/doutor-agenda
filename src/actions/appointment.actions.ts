@@ -42,6 +42,7 @@ export const addAppointment = actionClient
     });
 
     revalidatePath("/appointments");
+    revalidatePath("/dashboard");
   });
 
 export const deleteAppointment = actionClient
@@ -68,4 +69,5 @@ export const deleteAppointment = actionClient
       .where(eq(appointmentsTable.id, parsedInput.id));
 
     revalidatePath("/appointments");
+    revalidatePath("/dashboard");
   });
