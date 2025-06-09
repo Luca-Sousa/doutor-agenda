@@ -8,7 +8,6 @@ import { requireSession } from "./clinic.actions";
 
 export const createStripeCheckout = actionClient.action(async () => {
   const session = await requireSession();
-  if (!session.user.clinic?.id) throw new Error("Clinic not Found");
 
   if (!process.env.STRIPE_SECRET_KEY)
     throw new Error("Stripe secret key not found");
