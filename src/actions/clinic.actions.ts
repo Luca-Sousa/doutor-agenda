@@ -2,6 +2,7 @@
 
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -33,6 +34,21 @@ export const createClinic = async (name: string) => {
   });
 
   redirect("/dashboard");
+};
+
+export const getUserClinics = async () => {
+  const session = await requireSession();
+
+  const clinics = await db
+    .select({
+      clinicId: clinicsTable.id,
+      name: clinicsTable.name,
+    })
+    .from(usersToClinicsTable)
+    .innerJoin(clinicsTable, eq(usersToClinicsTable.clinicId, clinicsTable.id))
+    .where(eq(usersToClinicsTable.userId, session.user.id));
+
+  return clinics;
 };
 
 dayjs.extend(utc);
