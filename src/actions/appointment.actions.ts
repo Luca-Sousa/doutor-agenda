@@ -17,7 +17,8 @@ export const addAppointment = actionClient
   .schema(addAppointmentSchema)
   .action(async ({ parsedInput }) => {
     const session = await requireSession();
-    if (!session.user.clinic?.id) throw new Error("Clinic not Found");
+    const activeClinicId = session.user.activeClinicId;
+    if (!activeClinicId) throw new Error("Clinic not Found");
 
     const availableTimes = await getAvailableTimes({
       doctorId: parsedInput.doctorId,
@@ -37,7 +38,7 @@ export const addAppointment = actionClient
 
     await db.insert(appointmentsTable).values({
       ...parsedInput,
-      clinicId: session.user.clinic.id,
+      clinicId: activeClinicId,
       date: appointmentDateTime,
     });
 
@@ -53,7 +54,8 @@ export const deleteAppointment = actionClient
   )
   .action(async ({ parsedInput }) => {
     const session = await requireSession();
-    if (!session.user.clinic?.id) throw new Error("Clinic not Found");
+    const activeClinicId = session.user.activeClinicId;
+    if (!activeClinicId) throw new Error("Clinic not Found");
 
     const appointment = await db.query.appointmentsTable.findFirst({
       where: eq(appointmentsTable.id, parsedInput.id),
@@ -61,7 +63,7 @@ export const deleteAppointment = actionClient
 
     if (!appointment) throw new Error("Agendamento não encontrado");
 
-    if (appointment.clinicId !== session.user.clinic?.id)
+    if (appointment.clinicId !== activeClinicId)
       throw new Error("O Agendamento não pertence a clínica.");
 
     await db

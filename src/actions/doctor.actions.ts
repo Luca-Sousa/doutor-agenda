@@ -18,14 +18,15 @@ export const deleteDoctor = actionClient
   )
   .action(async ({ parsedInput }) => {
     const session = await requireSession();
+    const activeClinicId = session.user.activeClinicId;
+    if (!activeClinicId) throw new Error("Clinic not Found");
 
     const doctor = await db.query.doctorsTable.findFirst({
       where: eq(doctorsTable.id, parsedInput.id),
     });
     if (!doctor) throw new Error("Médico não encontrado!");
 
-    if (doctor.clinicId !== session.user.clinic?.id)
-      throw new Error("Unauthorized!");
+    if (doctor.clinicId !== activeClinicId) throw new Error("Unauthorized!");
 
     await db.delete(doctorsTable).where(eq(doctorsTable.id, parsedInput.id));
 

@@ -29,6 +29,7 @@ import { Form } from "@/components/ui/form";
 import { SelectGroup, SelectItem, SelectLabel } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { medicalSpecialties, timeOptions, weekDays } from "@/contants";
+import { useClinic } from "@/context/clinic-context";
 import { doctorsTable } from "@/db/schema";
 
 const formSchema = z
@@ -118,8 +119,14 @@ const UpsertDoctorForm = ({
   });
 
   const isLoading = upsertDoctorAction.isPending;
+  const { activeClinic } = useClinic();
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    if (!activeClinic) {
+      toast.error("Nenhuma clínica selecionada.");
+      return;
+    }
+
     upsertDoctorAction.execute({
       ...values,
       id: doctor?.id,

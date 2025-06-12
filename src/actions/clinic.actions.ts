@@ -56,11 +56,22 @@ dayjs.extend(utc);
 export const upsertDoctor = actionClient
   .schema(upsertDoctorSchema)
   .action(async ({ parsedInput }) => {
-    const session = await requireSession();
-    if (!session.user.clinic?.id) throw new Error("Clinic not Found");
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    if (!session?.user) throw new Error("Unauthorized");
 
-    const availableFromTime = parsedInput.availableFromTime;
-    const availableToTime = parsedInput.availableToTime;
+    const { availableFromTime, availableToTime } = parsedInput;
+
+    const activeClinicId = session.user.activeClinicId;
+    if (!activeClinicId) throw new Error("Clinic not Found");
+
+    const userClinics = await getUserClinics();
+
+    const clinicAuthorized = userClinics.some((c) => c.clinicId === activeClinicId);
+    if (!clinicAuthorized) {
+      throw new Error("User is not authorized for the specified clinic");
+    }
 
     const availableFromTimeUTC = dayjs()
       .set("hour", parseInt(availableFromTime.split(":")[0]))
@@ -79,7 +90,7 @@ export const upsertDoctor = actionClient
       .values({
         ...parsedInput,
         id: parsedInput.id,
-        clinicId: session.user.clinic.id,
+        clinicId: activeClinicId,
         availableFromTime: availableFromTimeUTC.format("HH:mm:ss"),
         availableToTime: availableToTimeUTC.format("HH:mm:ss"),
       })

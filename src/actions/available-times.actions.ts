@@ -20,7 +20,8 @@ export const getAvailableTimes = actionClient
   )
   .action(async ({ parsedInput }) => {
     const session = await requireSession();
-    if (!session.user.clinic?.id) throw new Error("Clinic not Found");
+    const activeClinicId = session.user.activeClinicId;
+    if (!activeClinicId) throw new Error("Clinic not Found");
 
     const doctor = await db.query.doctorsTable.findFirst({
       where: eq(doctorsTable.id, parsedInput.doctorId),

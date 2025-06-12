@@ -22,13 +22,15 @@ const DoctorsPage = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
   if (!session?.user) redirect("/authentication");
-  if (!session.user.clinic) redirect("/clinic-form");
+
+  const activeClinicId = session.user.activeClinicId;
+  if (!activeClinicId) redirect("/clinic-form");
+
   if (!session.user.plan) redirect("/new-subscription");
 
   const doctors = await db.query.doctorsTable.findMany({
-    where: eq(doctorsTable.clinicId, session.user.clinic.id),
+    where: eq(doctorsTable.clinicId, activeClinicId),
   });
 
   return (

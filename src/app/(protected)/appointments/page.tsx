@@ -23,21 +23,22 @@ const AppointmentsPage = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-
   if (!session?.user) redirect("/authentication");
-  if (!session.user.clinic) redirect("/clinic-form");
-  if (!session.user.plan) redirect("/new-subscription");
 
+  const activeClinicId = session.user.activeClinicId;
+  if (!activeClinicId) redirect("/clinic-form");
+
+  if (!session.user.plan) redirect("/new-subscription");
 
   const [patients, doctors, appointments] = await Promise.all([
     db.query.patientsTable.findMany({
-      where: eq(patientsTable.clinicId, session.user.clinic.id),
+      where: eq(patientsTable.clinicId, activeClinicId),
     }),
     db.query.doctorsTable.findMany({
-      where: eq(doctorsTable.clinicId, session.user.clinic.id),
+      where: eq(doctorsTable.clinicId, activeClinicId),
     }),
     db.query.appointmentsTable.findMany({
-      where: eq(appointmentsTable.clinicId, session.user.clinic.id),
+      where: eq(appointmentsTable.clinicId, activeClinicId),
       with: {
         patient: true,
         doctor: true,

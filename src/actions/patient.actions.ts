@@ -15,14 +15,15 @@ export const upsertPatient = actionClient
   .schema(upsertPatientSchema)
   .action(async ({ parsedInput }) => {
     const session = await requireSession();
-    if (!session.user.clinic?.id) throw new Error("Clinic not Found");
+    const activeClinicId = session.user.activeClinicId;
+    if (!activeClinicId) throw new Error("Clinic not Found");
 
     await db
       .insert(patientsTable)
       .values({
         ...parsedInput,
         id: parsedInput.id,
-        clinicId: session.user.clinic.id,
+        clinicId: activeClinicId,
       })
       .onConflictDoUpdate({
         target: [patientsTable.id],
@@ -42,7 +43,8 @@ export const deletePatient = actionClient
   )
   .action(async ({ parsedInput }) => {
     const session = await requireSession();
-    if (!session.user.clinic?.id) throw new Error("Clinic not Found");
+    const activeClinicId = session.user.activeClinicId;
+    if (!activeClinicId) throw new Error("Clinic not Found");
 
     const patient = await db.query.patientsTable.findFirst({
       where: eq(patientsTable.id, parsedInput.id),
@@ -50,7 +52,7 @@ export const deletePatient = actionClient
 
     if (!patient) throw new Error("Paciente não encontrado");
 
-    if (patient.clinicId !== session.user.clinic?.id)
+    if (patient.clinicId !== activeClinicId)
       throw new Error("O paciente não pertence a clínica.");
 
     await db.delete(patientsTable).where(eq(patientsTable.id, parsedInput.id));

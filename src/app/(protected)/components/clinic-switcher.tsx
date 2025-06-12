@@ -2,8 +2,9 @@
 
 import { ChevronsUpDown, PlusIcon } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import * as React from "react";
-import { useState } from "react";
+import { useEffect } from "react";
 
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useClinic } from "@/context/clinic-context";
 
 interface ClinicSwitcherProps {
   clinics: {
@@ -29,8 +31,16 @@ interface ClinicSwitcherProps {
 }
 
 const ClinicSwitcher = ({ clinics }: ClinicSwitcherProps) => {
+  const router = useRouter();
   const { isMobile } = useSidebar();
-  const [activeClinic, setActiveClinic] = useState(clinics[0]);
+
+  const { activeClinic, setActiveClinic } = useClinic();
+
+  useEffect(() => {
+    if (!activeClinic && clinics.length > 0) {
+      setActiveClinic(clinics[0]); // seta a primeira como padrão
+    }
+  }, [clinics, activeClinic, setActiveClinic]);
 
   return (
     <SidebarMenu>
@@ -51,7 +61,7 @@ const ClinicSwitcher = ({ clinics }: ClinicSwitcherProps) => {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
-                  Clínica {activeClinic.name}
+                  Clínica {activeClinic?.name}
                 </span>
                 {/* <span className="truncate text-xs">
                 {activeClinic.description}
@@ -72,7 +82,11 @@ const ClinicSwitcher = ({ clinics }: ClinicSwitcherProps) => {
             {clinics.map((clinic, index) => (
               <DropdownMenuItem
                 key={clinic.name}
-                onClick={() => setActiveClinic(clinic)}
+                onClick={() => {
+                  setActiveClinic(clinic);
+                  document.cookie = `activeClinicId=${clinic.clinicId}; path=/`;
+                  router.refresh(); // força reload com nova sessão
+                }}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
@@ -88,7 +102,11 @@ const ClinicSwitcher = ({ clinics }: ClinicSwitcherProps) => {
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer gap-2 p-2">
+
+            <DropdownMenuItem
+              className="cursor-pointer gap-2 p-2"
+              onClick={() => router.push("/clinic-form")}
+            >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <PlusIcon className="size-4" />
               </div>

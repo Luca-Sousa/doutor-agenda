@@ -13,11 +13,11 @@ import { auth } from "@/lib/auth";
 import ClinicForm from "./componentes/form";
 
 const ClinicFormPage = async () => {
-const session = await auth.api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
-
   if (!session?.user) redirect("/authentication");
+
   if (!session.user.plan) redirect("/new-subscription");
 
   return (

@@ -19,7 +19,9 @@ const SubscriptionPage = async () => {
   });
 
   if (!session?.user) redirect("/authentication");
-  if (!session.user.clinic) redirect("/clinic-form");
+
+  const activeClinicId = session.user.activeClinicId;
+  if (!activeClinicId) redirect("/clinic-form");
 
   return (
     <PageContainer>
