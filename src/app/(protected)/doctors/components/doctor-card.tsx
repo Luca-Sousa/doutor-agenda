@@ -42,11 +42,6 @@ interface DoctorCardProps {
 const DoctorCard = ({ doctor }: DoctorCardProps) => {
   const [isUpsertDialogOpen, setIsUpsertDialogOpen] = useState(false);
 
-  const doctorInitials = doctor.name
-    .split(" ")
-    .map((name) => name[0])
-    .join("");
-
   const availability = getAvailability(doctor);
 
   const deleteDoctorAction = useAction(deleteDoctor, {
@@ -71,7 +66,7 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Avatar className="size-12">
-            <AvatarFallback>{doctorInitials}</AvatarFallback>
+            <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
           </Avatar>
 
           <div className="flex-1">

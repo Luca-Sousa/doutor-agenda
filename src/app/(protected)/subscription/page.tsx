@@ -20,9 +20,6 @@ const SubscriptionPage = async () => {
 
   if (!session?.user) redirect("/authentication");
 
-  const activeClinicId = session.user.activeClinicId;
-  if (!activeClinicId) redirect("/clinic-form");
-
   return (
     <PageContainer>
       <PageHeader>

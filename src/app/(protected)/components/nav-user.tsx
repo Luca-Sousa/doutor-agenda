@@ -32,6 +32,7 @@ const NavUser = () => {
   const router = useRouter();
   const session = authClient.useSession();
   const { isMobile } = useSidebar();
+  const user = session.data?.user;
 
   const handleSignOut = () => {
     authClient.signOut({
@@ -53,21 +54,18 @@ const NavUser = () => {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
-                {session.data?.user.image && (
-                  <AvatarImage
-                    src={session.data.user.image}
-                    alt="imagem do usuário"
-                  />
+              <Avatar className="size-8 rounded-lg">
+                {user?.image && (
+                  <AvatarImage src={user.image} alt="imagem do usuário" />
                 )}
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg uppercase">
+                  {user?.name.charAt(0)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">
-                  {session.data?.user.name}
-                </span>
-                <span className="truncate text-xs">
-                  {session.data?.user.email}
+                <span className="truncate font-medium">{user?.name}</span>
+                <span className="truncate text-xs capitalize">
+                  {user?.plan ? `Plano ${user.plan}` : "Plano Gratuito"}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -83,36 +81,32 @@ const NavUser = () => {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  {session.data?.user.image && (
-                    <AvatarImage
-                      src={session.data.user.image}
-                      alt="imagem do usuário"
-                    />
+                  {user?.image && (
+                    <AvatarImage src={user.image} alt="imagem do usuário" />
                   )}
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg uppercase">
+                    {user?.name.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {session.data?.user.name}
-                  </span>
-                  <span className="truncate text-xs">
-                    {session.data?.user.email}
+                  <span className="truncate font-medium">{user?.name}</span>
+                  <span className="truncate text-xs capitalize">
+                    {user?.plan ? `Plano ${user.plan}` : "Plano Gratuito"}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {!session.data?.user.plan && (
-              <>
-                <DropdownMenuGroup>
-                  <DropdownMenuItem className="cursor-pointer">
-                    <SparklesIcon />
-                    Atualizar plano
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-              </>
-            )}
+            <DropdownMenuGroup>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => router.push("/subscription")}
+              >
+                <SparklesIcon />
+                {!user?.plan ? "Adquirir plano" : "Atualizar plano"}
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem className="cursor-pointer">
                 <BadgeCheck />

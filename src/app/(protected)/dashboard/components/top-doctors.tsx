@@ -28,11 +28,7 @@ const TopDoctors = ({ doctors }: TopDoctorsProps) => {
               <div className="flex items-center gap-4">
                 <Avatar className="size-10">
                   <AvatarFallback className="bg-gray-100 text-lg font-medium text-gray-600">
-                    {doctor.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .slice(0, 2)}
+                    {doctor.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <div>

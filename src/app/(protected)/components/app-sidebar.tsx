@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDaysIcon,
   LayoutDashboardIcon,
@@ -8,13 +7,14 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 
-import { getUserClinics } from "@/actions/clinic.actions";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
 
 import ClinicSwitcher from "./clinic-switcher";
 import NavMain from "./nav-main";
@@ -44,19 +44,26 @@ const items = [
 ];
 
 const AppSidebar = () => {
-  const { data: clinic } = useQuery({
-    queryKey: ["userClinics"],
-    queryFn: () => getUserClinics(),
-  });
+  const session = authClient.useSession();
+  const clinics = session.data?.user.clinics;
+  const userPlan = session.data?.user.plan;
 
   return (
     <Sidebar>
-      {/* <div className=" border-b px-6 py-4">
-        <Image src="/logo.svg" alt="Doutor Agenda" width={136} height={28} />
-      </div> */}
-
       <SidebarHeader className="border-b p-4">
-        {clinic && <ClinicSwitcher clinics={clinic} />}
+        {!clinics ? (
+          <div className="flex h-[48px] w-full gap-2 rounded-lg bg-neutral-100 p-2">
+            <Skeleton className="aspect-square size-8 rounded-lg bg-neutral-200" />
+
+            <div className="my-auto flex-1 flex-col">
+              <Skeleton className="h-3 w-32 bg-neutral-200" />
+            </div>
+
+            <Skeleton className="h-8 w-5 rounded-md bg-neutral-200" />
+          </div>
+        ) : (
+          <ClinicSwitcher clinics={clinics} userPlan={userPlan} />
+        )}
       </SidebarHeader>
 
       <SidebarContent>
@@ -64,7 +71,20 @@ const AppSidebar = () => {
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser />
+        {!session.data?.user ? (
+          <div className="flex h-[48px] w-full gap-2 bg-neutral-100 p-2">
+            <Skeleton className="size-8 rounded-full bg-neutral-200" />
+
+            <div className="flex flex-1 flex-col justify-between">
+              <Skeleton className="h-3 w-32 bg-neutral-200" />
+              <Skeleton className="h-2.5 w-24 bg-neutral-200" />
+            </div>
+
+            <Skeleton className="h-8 w-5 rounded-md bg-neutral-200" />
+          </div>
+        ) : (
+          <NavUser />
+        )}
       </SidebarFooter>
     </Sidebar>
   );

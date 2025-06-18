@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Clinic = {
-  clinicId: string;
+  id: string;
   name: string;
 };
 

@@ -26,11 +26,6 @@ const PatientCard = ({ patient }: PatientCardProps) => {
   const [isUpsertPatientDialogOpen, setIsUpsertPatientDialogOpen] =
     useState(false);
 
-  const patientInitials = patient.name
-    .split(" ")
-    .map((name) => name[0])
-    .join("");
-
   const formatPhoneNumber = (phone: string) => {
     if (!phone) return "";
 
@@ -47,7 +42,7 @@ const PatientCard = ({ patient }: PatientCardProps) => {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Avatar className="size-12">
-            <AvatarFallback>{patientInitials}</AvatarFallback>
+            <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
           </Avatar>
 
           <div className="flex-1">

@@ -175,10 +175,7 @@ const AddAppointmentForm = ({
               <SelectItem key={patient.id} value={patient.id}>
                 <Avatar>
                   <AvatarFallback className="uppercase">
-                    {patient.name
-                      .split(" ")
-                      .map((name) => name[0])
-                      .join("")}
+                    {patient.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 {patient.name}
@@ -197,10 +194,7 @@ const AddAppointmentForm = ({
               <SelectItem key={doctor.id} value={doctor.id}>
                 <Avatar>
                   <AvatarFallback className="uppercase">
-                    {doctor.name
-                      .split(" ")
-                      .map((name) => name[0])
-                      .join("")}
+                    {doctor.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 {doctor.name} - {doctor.specialty}
