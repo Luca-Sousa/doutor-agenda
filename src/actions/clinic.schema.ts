@@ -6,6 +6,9 @@ export const upsertDoctorSchema = z
     name: z.string().trim().min(1, {
       message: "Nome é obrigatório.",
     }),
+    avatarImageUrl: z
+      .array(z.union([z.instanceof(File), z.string()]))
+      .optional(),
     specialty: z.string().trim().min(1, {
       message: "Especialidade é obrigatória.",
     }),
@@ -28,6 +31,6 @@ export const upsertDoctorSchema = z
     {
       message:
         "O horário de início não pode ser anterior ao horário de término.",
-      path: ["avaliableToTime"],
+      path: ["availableToTime"],
     },
   );

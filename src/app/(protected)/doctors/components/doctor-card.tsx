@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,14 +64,17 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <Avatar className="size-12">
+        <div className="flex items-center gap-3">
+          <Avatar className="size-16">
+            {doctor.avatarImageUrl && (
+              <AvatarImage src={doctor.avatarImageUrl} alt="Imagem do Doutor" className="object-cover" />
+            )}
             <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
           </Avatar>
 
           <div className="flex-1">
-            <h3 className="text-sm font-medium">{doctor.name}</h3>
-            <p className="text-muted-foreground text-sm">{doctor.specialty}</p>
+            <h3 className="text-lg font-medium">{doctor.name}</h3>
+            <p className="text-muted-foreground text-lg">{doctor.specialty}</p>
           </div>
         </div>
       </CardHeader>

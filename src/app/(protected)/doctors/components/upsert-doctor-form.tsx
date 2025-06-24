@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { upsertDoctor } from "@/actions/clinic.actions";
+import FileUploader from "@/components/file-uploader";
 import CustomFormField, {
   FormFieldType,
 } from "@/components/form/custom-form-field";
@@ -25,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
+import { Form, FormControl } from "@/components/ui/form";
 import { SelectGroup, SelectItem, SelectLabel } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { medicalSpecialties, timeOptions, weekDays } from "@/contants";
@@ -37,6 +38,9 @@ const formSchema = z
     name: z.string().trim().min(1, {
       message: "Nome é obrigatório.",
     }),
+    avatarImageUrl: z
+      .array(z.union([z.instanceof(File), z.string()]))
+      .optional(),
     specialty: z.string().trim().min(1, {
       message: "Especialidade é obrigatória.",
     }),
@@ -79,6 +83,9 @@ const UpsertDoctorForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: doctor?.name ?? "",
+      avatarImageUrl: doctor?.avatarImageUrl
+        ? [doctor.avatarImageUrl] // agora é string
+        : undefined,
       specialty: doctor?.specialty ?? "",
       appointmentPrice: doctor?.appointmentPriceInCents
         ? doctor.appointmentPriceInCents / 100
@@ -94,6 +101,9 @@ const UpsertDoctorForm = ({
     if (isOpen) {
       form.reset({
         name: doctor?.name ?? "",
+        avatarImageUrl: doctor?.avatarImageUrl
+          ? [doctor.avatarImageUrl]
+          : undefined,
         specialty: doctor?.specialty ?? "",
         appointmentPrice: doctor?.appointmentPriceInCents
           ? doctor.appointmentPriceInCents / 100
@@ -137,7 +147,7 @@ const UpsertDoctorForm = ({
   };
 
   return (
-    <DialogContent>
+    <DialogContent className="min-w-2xl">
       <DialogHeader>
         <DialogTitle>
           {doctor ? `Médico: ${doctor.name}` : "Adicionar Médico"}
@@ -151,36 +161,57 @@ const UpsertDoctorForm = ({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <CustomFormField
-            control={form.control}
-            fieldType={FormFieldType.INPUT}
-            icon={UserPenIcon}
-            name="name"
-            label="Nome"
-            placeholder="Digite o nome do médico"
-          />
+          <div className="flex gap-3">
+            <div>
+              <CustomFormField
+                fieldType={FormFieldType.SKELETON}
+                control={form.control}
+                name="avatarImageUrl"
+                label="Imagem do Médico"
+                renderSkeleton={(field) => (
+                  <FormControl>
+                    <FileUploader
+                      files={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                )}
+              />
+            </div>
 
-          <CustomFormField
-            control={form.control}
-            fieldType={FormFieldType.SELECT}
-            name="specialty"
-            label="Especialidade"
-            placeholder="Selecione uma especialidade"
-          >
-            {medicalSpecialties.map((specialty) => (
-              <SelectItem key={specialty.label} value={specialty.value}>
-                {specialty.label}
-              </SelectItem>
-            ))}
-          </CustomFormField>
+            <div className="flex-1 space-y-6">
+              <CustomFormField
+                control={form.control}
+                fieldType={FormFieldType.INPUT}
+                icon={UserPenIcon}
+                name="name"
+                label="Nome"
+                placeholder="Digite o nome do médico"
+              />
 
-          <CustomFormField
-            control={form.control}
-            fieldType={FormFieldType.NUMERICFORMAT}
-            icon={HandCoinsIcon}
-            name="appointmentPrice"
-            label="Preço da consulta"
-          />
+              <CustomFormField
+                control={form.control}
+                fieldType={FormFieldType.SELECT}
+                name="specialty"
+                label="Especialidade"
+                placeholder="Selecione uma especialidade"
+              >
+                {medicalSpecialties.map((specialty) => (
+                  <SelectItem key={specialty.label} value={specialty.value}>
+                    {specialty.label}
+                  </SelectItem>
+                ))}
+              </CustomFormField>
+
+              <CustomFormField
+                control={form.control}
+                fieldType={FormFieldType.NUMERICFORMAT}
+                icon={HandCoinsIcon}
+                name="appointmentPrice"
+                label="Preço da consulta"
+              />
+            </div>
+          </div>
 
           <div className="flex gap-3">
             <CustomFormField
@@ -212,65 +243,67 @@ const UpsertDoctorForm = ({
             </CustomFormField>
           </div>
 
-          <CustomFormField
-            control={form.control}
-            fieldType={FormFieldType.SELECT}
-            name="availableFromTime"
-            label="Horário inicial de disponibilidade"
-            placeholder="Selecione um horário"
-          >
-            <div className="grid w-full grid-cols-3 gap-3 p-2">
-              {Object.entries(timeOptions).map(([label, times]) => (
-                <React.Fragment key={label}>
-                  <SelectGroup className="rounded-lg border shadow">
-                    <SelectLabel className="text-center text-base">
-                      {label}
-                    </SelectLabel>
-                    <Separator />
-                    {times.map((time) => (
-                      <SelectItem
-                        key={time}
-                        value={`${time}:00`}
-                        className="justify-center px-0"
-                      >
-                        {time}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </React.Fragment>
-              ))}
-            </div>
-          </CustomFormField>
+          <div className="flex gap-3">
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.SELECT}
+              name="availableFromTime"
+              label="Horário inicial de disponibilidade"
+              placeholder="Selecione um horário"
+            >
+              <div className="grid w-full grid-cols-3 gap-3 p-2">
+                {Object.entries(timeOptions).map(([label, times]) => (
+                  <React.Fragment key={label}>
+                    <SelectGroup className="rounded-lg border shadow">
+                      <SelectLabel className="text-center text-base">
+                        {label}
+                      </SelectLabel>
+                      <Separator />
+                      {times.map((time) => (
+                        <SelectItem
+                          key={time}
+                          value={`${time}:00`}
+                          className="justify-center px-0"
+                        >
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </React.Fragment>
+                ))}
+              </div>
+            </CustomFormField>
 
-          <CustomFormField
-            control={form.control}
-            fieldType={FormFieldType.SELECT}
-            name="availableToTime"
-            label="Horário final de disponibilidade"
-            placeholder="Selecione um horário"
-          >
-            <div className="grid w-full grid-cols-3 gap-3 p-2">
-              {Object.entries(timeOptions).map(([label, times]) => (
-                <React.Fragment key={label}>
-                  <SelectGroup className="rounded-lg border shadow">
-                    <SelectLabel className="text-center text-base">
-                      {label}
-                    </SelectLabel>
-                    <Separator />
-                    {times.map((time) => (
-                      <SelectItem
-                        key={time}
-                        value={`${time}:00`}
-                        className="justify-center px-0"
-                      >
-                        {time}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </React.Fragment>
-              ))}
-            </div>
-          </CustomFormField>
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.SELECT}
+              name="availableToTime"
+              label="Horário final de disponibilidade"
+              placeholder="Selecione um horário"
+            >
+              <div className="grid w-full grid-cols-3 gap-3 p-2">
+                {Object.entries(timeOptions).map(([label, times]) => (
+                  <React.Fragment key={label}>
+                    <SelectGroup className="rounded-lg border shadow">
+                      <SelectLabel className="text-center text-base">
+                        {label}
+                      </SelectLabel>
+                      <Separator />
+                      {times.map((time) => (
+                        <SelectItem
+                          key={time}
+                          value={`${time}:00`}
+                          className="justify-center px-0"
+                        >
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </React.Fragment>
+                ))}
+              </div>
+            </CustomFormField>
+          </div>
 
           <DialogFooter>
             <SubmitButtonForm isLoading={isLoading}>

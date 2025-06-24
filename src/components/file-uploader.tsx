@@ -5,13 +5,20 @@ import Image from "next/image";
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
+type FileOrUrl = File | string;
+
 type FileUploaderProps = {
-  files: File[] | null;
-  onChange: (fileUrl: File[]) => void;
+  files: FileOrUrl[] | null;
+  onChange: (files: FileOrUrl[]) => void;
 };
 
 const FileUploader = ({ files, onChange }: FileUploaderProps) => {
-  const convertFileToUrl = (file: File) => URL.createObjectURL(file);
+  const convertFileToUrl = (file: FileOrUrl): string => {
+    if (file instanceof File) {
+      return URL.createObjectURL(file);
+    }
+    return file; // string URL
+  };
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -22,16 +29,14 @@ const FileUploader = ({ files, onChange }: FileUploaderProps) => {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    accept: {
-      "image/*": [],
-    },
+    accept: { "image/*": [] },
     multiple: false,
   });
 
   return (
     <div
       {...getRootProps()}
-      className="border-primbg-primary bg-secondary mx-auto flex size-40 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed"
+      className="border-border bg-secondary mx-auto flex size-56 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed"
     >
       <input {...getInputProps()} />
       {files && files.length > 0 ? (
@@ -40,12 +45,11 @@ const FileUploader = ({ files, onChange }: FileUploaderProps) => {
           alt="Imagem"
           width={1000}
           height={1000}
-          className="size-40 overflow-hidden rounded-2xl object-cover object-top"
+          className="size-56 overflow-hidden rounded-2xl object-cover object-top"
         />
       ) : (
         <>
           <CloudUploadIcon size={40} className="text-primary" />
-
           <p className="text-dark-600 max-w-32 gap-2 text-center text-xs">
             <span className="text-primary font-semibold">
               Click para fazer upload
