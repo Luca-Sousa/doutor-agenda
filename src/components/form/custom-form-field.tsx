@@ -3,8 +3,8 @@
 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, LucideIcon } from "lucide-react";
-import React, { HTMLInputTypeAttribute } from "react";
+import { CalendarIcon, EyeIcon, EyeOffIcon, LucideIcon } from "lucide-react";
+import React, { HTMLInputTypeAttribute, useState } from "react";
 import { Matcher } from "react-day-picker";
 import { Control } from "react-hook-form";
 import { NumericFormat, PatternFormat } from "react-number-format";
@@ -36,6 +36,7 @@ export enum FormFieldType {
   SELECT = "select",
   NUMERICFORMAT = "NumericFormat",
   POPOVERCALENDER = "popover",
+  SKELETON = "skeleton",
 }
 
 interface CustomFormFieldPros {
@@ -49,6 +50,7 @@ interface CustomFormFieldPros {
   children?: React.ReactNode;
   disabled?: boolean;
   disabledCalendar?: Matcher | Matcher[] | undefined;
+  renderSkeleton?: (field: any) => React.ReactNode;
 }
 
 const RenderField = ({
@@ -66,8 +68,11 @@ const RenderField = ({
     children,
     disabled,
     disabledCalendar,
+    renderSkeleton,
   } = props;
   const Icon = icon;
+
+  const [showPassword, setShowPassword] = useState(false);
 
   switch (fieldType) {
     case FormFieldType.INPUT:
@@ -77,12 +82,31 @@ const RenderField = ({
 
           <FormControl>
             <Input
-              type={typeInput}
+              type={
+                typeInput === "password"
+                  ? showPassword
+                    ? "text"
+                    : "password"
+                  : typeInput
+              }
               placeholder={placeholder}
               {...field}
               className="h-11 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </FormControl>
+
+          {typeInput === "password" && (
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="text-primary/70 mr-3 size-5 cursor-pointer"
+              onClick={() => setShowPassword((prev) => !prev)}
+              disabled={field.value === "" && field.value !== undefined}
+            >
+              {showPassword ? <EyeIcon /> : <EyeOffIcon />}
+            </Button>
+          )}
         </div>
       );
     case FormFieldType.PHONE_INPUT:
@@ -182,6 +206,8 @@ const RenderField = ({
           </PopoverContent>
         </Popover>
       );
+    case FormFieldType.SKELETON:
+      return renderSkeleton ? renderSkeleton(field) : null;
 
     default:
       break;
@@ -189,7 +215,7 @@ const RenderField = ({
 };
 
 const CustomFormField = (props: CustomFormFieldPros) => {
-  const { control, name, label } = props;
+  const { control, name, label, renderSkeleton } = props;
 
   return (
     <FormField
@@ -197,7 +223,12 @@ const CustomFormField = (props: CustomFormFieldPros) => {
       name={name}
       render={({ field }) => (
         <FormItem className="flex-1">
-          <FormLabel>{label}</FormLabel>
+          <FormLabel className={`${renderSkeleton && "flex"}`}>
+            {label}{" "}
+            {renderSkeleton && (
+              <span className="text-muted-foreground text-xs">(opcional)</span>
+            )}
+          </FormLabel>
           <RenderField field={field} props={props} />
           <FormMessage />
         </FormItem>

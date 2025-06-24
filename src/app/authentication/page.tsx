@@ -25,7 +25,7 @@ const AuthenticationPage = async () => {
           className="object-cover"
         />
       </div>
-      <Tabs defaultValue="login" className="w-[400px]">
+      <Tabs defaultValue="login" className="w-[450px]">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="login" className="cursor-pointer">
             Login

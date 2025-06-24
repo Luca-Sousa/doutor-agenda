@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import FileUploader from "@/components/file-uploader";
 import CustomFormField, {
   FormFieldType,
 } from "@/components/form/custom-form-field";
@@ -19,13 +20,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Form } from "@/components/ui/form";
+import { Form, FormControl } from "@/components/ui/form";
 import { authClient } from "@/lib/auth-client";
+import { handleFileUpload } from "@/utils/createImage";
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, {
     message: "Nome é obrigatório",
   }),
+  image: z.array(z.instanceof(File, { message: "Imagem inválida" })).optional(),
   email: z
     .string()
     .trim()
@@ -45,6 +48,7 @@ const SignUpForm = () => {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
+      image: undefined,
       email: "",
       password: "",
     },
@@ -53,9 +57,18 @@ const SignUpForm = () => {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
+    const imageUserUrl = async () => {
+      if (values.image && values.image.length > 0) {
+        return await handleFileUpload(values.image[0]);
+      }
+
+      return undefined;
+    };
+
     await authClient.signUp.email(
       {
         email: values.email,
+        image: await imageUserUrl(),
         name: values.name,
         password: values.password,
       },
@@ -86,6 +99,18 @@ const SignUpForm = () => {
           </CardHeader>
 
           <CardContent className="space-y-4">
+            <CustomFormField
+              fieldType={FormFieldType.SKELETON}
+              control={form.control}
+              name="image"
+              label="Imagem de Perfil"
+              renderSkeleton={(field) => (
+                <FormControl>
+                  <FileUploader files={field.value} onChange={field.onChange} />
+                </FormControl>
+              )}
+            />
+
             <CustomFormField
               control={form.control}
               fieldType={FormFieldType.INPUT}
