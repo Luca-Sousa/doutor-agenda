@@ -1,14 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon } from "lucide-react";
-import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { useRouter } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { createClinic } from "@/actions/clinic.actions";
-import { Button } from "@/components/ui/button";
+import SubmitButtonForm from "@/components/form/submit-button-form";
 import { DialogFooter } from "@/components/ui/dialog";
 import {
   Form,
@@ -27,6 +27,7 @@ const clinicFormSchema = z.object({
 });
 
 const ClinicForm = () => {
+  const router = useRouter();
   const form = useForm<z.infer<typeof clinicFormSchema>>({
     resolver: zodResolver(clinicFormSchema),
     defaultValues: {
@@ -34,20 +35,23 @@ const ClinicForm = () => {
     },
   });
 
-  const onSubmit = async ({ name }: z.infer<typeof clinicFormSchema>) => {
-    try {
-      await createClinic(name);
-
+  const createClinicAction = useAction(createClinic, {
+    onSuccess: () => {
       toast.success("Clínica criada com sucesso!");
       form.reset();
-    } catch (error) {
-      if (isRedirectError(error)) {
-        return;
-      }
+      router.push("/dashboard");
+    },
+    onError: ({ error }) => {
       console.error(error);
       toast.error("Erro ao criar clínica!");
-    }
+    },
+  });
+
+  const onSubmit = async ({ name }: z.infer<typeof clinicFormSchema>) => {
+    createClinicAction.execute({ name });
   };
+
+  const isLoading = createClinicAction.isPending;
 
   return (
     <>
@@ -66,18 +70,11 @@ const ClinicForm = () => {
               </FormItem>
             )}
           />
+
           <DialogFooter>
-            <Button
-              type="submit"
-              className="w-full cursor-pointer"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? (
-                <Loader2Icon className="size-4 animate-spin" />
-              ) : (
-                "Criar clínica"
-              )}
-            </Button>
+            <SubmitButtonForm isLoading={isLoading}>
+              Criar clínica
+            </SubmitButtonForm>
           </DialogFooter>
         </form>
       </Form>

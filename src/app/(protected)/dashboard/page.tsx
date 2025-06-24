@@ -34,8 +34,9 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   });
   if (!session?.user) redirect("/authentication");
 
+  const userClinics = session.user.clinics;
   const activeClinicId = session.user.activeClinicId;
-  if (!activeClinicId) redirect("/clinic-form");
+  if (userClinics.length <= 0 || !activeClinicId) redirect("/clinic-form");
 
   const { from, to } = await searchParams;
   if (!from || !to) {
@@ -56,11 +57,7 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   } = await getDashboard({
     from,
     to,
-    session: {
-      user: {
-        activeClinicId,
-      },
-    },
+    activeClinicId,
   });
 
   return (

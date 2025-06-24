@@ -4,8 +4,8 @@ import { ChevronsUpDown, PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { useEffect } from "react";
 
+import { updateActiveClinic } from "@/actions/user.actions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +21,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useClinic } from "@/context/clinic-context";
 
 interface ClinicSwitcherProps {
   clinics: {
@@ -29,26 +28,30 @@ interface ClinicSwitcherProps {
     name: string;
   }[];
   userPlan: string | null | undefined;
+  activeClinicId: string | null | undefined;
+  onClinicChange?: (clinicId: string) => void;
 }
 
-const ClinicSwitcher = ({ clinics, userPlan }: ClinicSwitcherProps) => {
+const ClinicSwitcher = ({
+  clinics,
+  userPlan,
+  activeClinicId,
+  onClinicChange,
+}: ClinicSwitcherProps) => {
   const router = useRouter();
   const { isMobile } = useSidebar();
 
-  const { activeClinic, setActiveClinic } = useClinic();
+  const canAddMoreClinics = () => {
+    if (!userPlan && clinics.length >= 1) return false;
+    if (userPlan === "essential" && clinics.length >= 3) return false;
+    return true;
+  };
 
-  useEffect(() => {
-    if (!activeClinic && clinics.length > 0) {
-      setActiveClinic(clinics[0]);
-    }
-  }, [clinics, activeClinic, setActiveClinic]);
+  const handleClinicSelect = async (clinic: (typeof clinics)[0]) => {
+    await updateActiveClinic(clinic.id);
+    if (onClinicChange) onClinicChange(clinic.id);
 
-  const handleDisabledButton = () => {
-    if ((userPlan === null || userPlan === undefined) && clinics.length >= 1)
-      return true;
-    if (userPlan === "essential" && clinics.length >= 3) return true;
-
-    return false;
+    router.refresh();
   };
 
   return (
@@ -70,9 +73,11 @@ const ClinicSwitcher = ({ clinics, userPlan }: ClinicSwitcherProps) => {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium capitalize">
-                  {!activeClinic
+                  {!activeClinicId
                     ? "Dr. Agenda"
-                    : `Clínica ${activeClinic.name}`}
+                    : "Clínica " +
+                      (clinics.find((c) => c.id === activeClinicId)?.name ??
+                        "Clínica")}
                 </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
@@ -89,13 +94,12 @@ const ClinicSwitcher = ({ clinics, userPlan }: ClinicSwitcherProps) => {
             </DropdownMenuLabel>
             {clinics.map((clinic, index) => (
               <DropdownMenuItem
-                key={clinic.name}
-                onClick={() => {
-                  setActiveClinic(clinic);
-                  document.cookie = `activeClinicId=${clinic.id}; path=/`;
-                  router.refresh();
-                }}
-                className="gap-2 p-2"
+                key={clinic.id}
+                onClick={() => handleClinicSelect(clinic)}
+                className={`${
+                  activeClinicId === clinic.id &&
+                  "bg-accent text-accent-foreground"
+                } gap-2 p-2`}
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
                   <Image
@@ -113,18 +117,16 @@ const ClinicSwitcher = ({ clinics, userPlan }: ClinicSwitcherProps) => {
             <DropdownMenuItem
               className="cursor-pointer items-start gap-2 p-2"
               onClick={() => router.push("/clinic-form")}
-              disabled={handleDisabledButton()}
+              disabled={!canAddMoreClinics()}
             >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <PlusIcon className="size-4" />
               </div>
               <div className="text-muted-foreground font-medium">
-                {!handleDisabledButton() ? (
+                {canAddMoreClinics() ? (
                   "Adicionar Clínica"
                 ) : (
-                  <span className="text-xs">
-                    Você atingiu a quantidade máxima de clínicas do seu plano
-                  </span>
+                  <span className="text-xs">Limite de clínicas atingido</span>
                 )}
               </div>
             </DropdownMenuItem>

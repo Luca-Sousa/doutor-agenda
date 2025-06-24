@@ -7,17 +7,12 @@ import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
 interface Params {
   from: string;
   to: string;
-  session: {
-    user: {
-      activeClinicId: string;
-    };
-  };
+  activeClinicId: string;
 }
 
-export const getDashboard = async ({ from, to, session }: Params) => {
+export const getDashboard = async ({ from, to, activeClinicId }: Params) => {
   const chartStartDate = dayjs().subtract(10, "days").startOf("day").toDate();
   const chartEndDate = dayjs().add(10, "days").endOf("day").toDate();
-  const { activeClinicId } = session.user;
 
   const [
     [totalRevenue],

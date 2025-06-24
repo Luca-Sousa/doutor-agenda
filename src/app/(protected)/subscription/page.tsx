@@ -17,6 +17,11 @@ const SubscriptionPage = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+  if (!session?.user) redirect("/authentication");
+
+  const userClinics = session.user.clinics;
+  const activeClinicId = session.user.activeClinicId;
+  if (userClinics.length <= 0 || !activeClinicId) redirect("/clinic-form");
 
   if (!session?.user) redirect("/authentication");
 

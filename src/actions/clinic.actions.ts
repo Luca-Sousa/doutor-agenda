@@ -2,12 +2,18 @@
 
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import { db } from "@/db";
-import { clinicsTable, doctorsTable, usersToClinicsTable } from "@/db/schema";
+import {
+  clinicsTable,
+  doctorsTable,
+  usersTable,
+  usersToClinicsTable,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/safe-action";
 
@@ -22,18 +28,27 @@ export const requireSession = async () => {
   return session;
 };
 
-export const createClinic = async (name: string) => {
-  const session = await requireSession();
+export const createClinic = actionClient
+  .schema(
+    z.object({
+      name: z.string(),
+    }),
+  )
+  .action(async ({ parsedInput }) => {
+    const { name } = parsedInput;
+    const session = await requireSession();
+    const [clinic] = await db.insert(clinicsTable).values({ name }).returning();
 
-  const [clinic] = await db.insert(clinicsTable).values({ name }).returning();
+    await db.insert(usersToClinicsTable).values({
+      userId: session.user.id,
+      clinicId: clinic.id,
+    });
 
-  await db.insert(usersToClinicsTable).values({
-    userId: session.user.id,
-    clinicId: clinic.id,
+    await db
+      .update(usersTable)
+      .set({ activeClinicId: clinic.id })
+      .where(eq(usersTable.id, session.user.id));
   });
-
-  redirect("/dashboard");
-};
 
 dayjs.extend(utc);
 

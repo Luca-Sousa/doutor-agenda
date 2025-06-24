@@ -2,7 +2,6 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { customSession } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
-import { cookies } from "next/headers";
 
 import { db } from "@/db";
 import * as schema from "@/db/schema";
@@ -22,9 +21,6 @@ export const auth = betterAuth({
   },
   plugins: [
     customSession(async ({ user, session }) => {
-      const cookieStore = await cookies();
-      const activeClinicId = cookieStore.get("activeClinicId")?.value;
-
       const [userData, clinics] = await Promise.all([
         db.query.usersTable.findFirst({
           where: eq(usersTable.id, user.id),
@@ -48,7 +44,7 @@ export const auth = betterAuth({
           ...user,
           plan: userData?.plan,
           clinics: formattedClinics,
-          activeClinicId: activeClinicId || formattedClinics[0]?.id, // fallback
+          activeClinicId: userData?.activeClinicId,
         },
         session,
       };
@@ -70,6 +66,11 @@ export const auth = betterAuth({
       plan: {
         type: "string",
         fieldName: "plan",
+        required: false,
+      },
+      activeClinicId: {
+        type: "string",
+        fieldName: "activeClinicId",
         required: false,
       },
     },

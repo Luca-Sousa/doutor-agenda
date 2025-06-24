@@ -6,6 +6,7 @@ import {
   StethoscopeIcon,
   UsersRoundIcon,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import {
   Sidebar,
@@ -45,8 +46,23 @@ const items = [
 
 const AppSidebar = () => {
   const session = authClient.useSession();
-  const clinics = session.data?.user.clinics;
   const userPlan = session.data?.user.plan;
+  const userClinics = session.data?.user.clinics;
+  const userActiveClinicId = session.data?.user.activeClinicId;
+
+  const [clinics, setClinics] = useState(userClinics);
+  const [activeClinicId, setActiveClinicId] = useState(userActiveClinicId);
+
+  useEffect(() => {
+    if (userClinics && userClinics.length > 0) {
+      setClinics(userClinics);
+      setActiveClinicId(userActiveClinicId);
+    }
+  }, [userActiveClinicId, userClinics]);
+
+  const handleClinicChange = (id: string) => {
+    setActiveClinicId(id);
+  };
 
   return (
     <Sidebar>
@@ -62,7 +78,12 @@ const AppSidebar = () => {
             <Skeleton className="h-8 w-5 rounded-md bg-neutral-200" />
           </div>
         ) : (
-          <ClinicSwitcher clinics={clinics} userPlan={userPlan} />
+          <ClinicSwitcher
+            clinics={clinics}
+            userPlan={userPlan}
+            activeClinicId={activeClinicId}
+            onClinicChange={handleClinicChange}
+          />
         )}
       </SidebarHeader>
 
