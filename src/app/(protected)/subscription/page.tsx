@@ -26,6 +26,7 @@ const SubscriptionPage = async () => {
   if (!session?.user) redirect("/authentication");
 
   const userPlan = session.user.plan;
+  const userEmail = session.user.email;
 
   const activePlan = () => {
     if (userPlan === null) return "free";
@@ -95,7 +96,7 @@ const SubscriptionPage = async () => {
             <SubscriptionPlan
               key={plan.id}
               activePlan={activePlan()}
-              userEmail={session!.user.email}
+              userEmail={userEmail}
               plan={plan}
             />
           ))}
