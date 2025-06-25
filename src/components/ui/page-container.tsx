@@ -1,11 +1,31 @@
 import React from "react";
 
-export const PageContainer = ({ children }: { children: React.ReactNode }) => {
-  return <div className="space-y-6 p-6 w-full">{children}</div>;
+import { cn } from "@/lib/utils";
+
+export const PageContainer = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div className={cn("w-full space-y-6 p-6", className)}>{children}</div>
+  );
 };
 
-export const PageHeader = ({ children }: { children: React.ReactNode }) => {
-  return <div className="flex items-center justify-between w-full">{children}</div>;
+export const PageHeader = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div className={cn("flex w-full items-center justify-between", className)}>
+      {children}
+    </div>
+  );
 };
 
 export const PageHeaderContent = ({
@@ -13,7 +33,7 @@ export const PageHeaderContent = ({
 }: {
   children: React.ReactNode;
 }) => {
-  return <div className="space-y-1 w-full">{children}</div>;
+  return <div className="w-full space-y-1">{children}</div>;
 };
 
 export const PageTitle = ({ children }: { children: React.ReactNode }) => {
@@ -32,6 +52,12 @@ export const PageActions = ({ children }: { children: React.ReactNode }) => {
   return <div className="flex items-center gap-2">{children}</div>;
 };
 
-export const PageContent = ({ children }: { children: React.ReactNode }) => {
-  return <div className="space-y-6">{children}</div>;
+export const PageContent = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return <div className={cn("space-y-6", className)}>{children}</div>;
 };
