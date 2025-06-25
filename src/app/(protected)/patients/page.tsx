@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { DataTable } from "@/components/ui/data-table";
+import { DataTable } from "@/components/table/data-table";
 import {
   PageActions,
   PageContainer,

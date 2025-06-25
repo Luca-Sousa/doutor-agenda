@@ -7,6 +7,7 @@ import { ptBR } from "date-fns/locale";
 import { appointmentsTable } from "@/db/schema";
 import { formatCurrencyInCents } from "@/helpers/currency";
 
+import { DataTableColumnHeader } from "./data-table-column-header";
 import AppointmentsTableActions from "./table-actions";
 
 export type AppointmentWithRelations = typeof appointmentsTable.$inferSelect & {
@@ -25,9 +26,11 @@ export type AppointmentWithRelations = typeof appointmentsTable.$inferSelect & {
 };
 
 export const appointmentsTableColumns: ColumnDef<AppointmentWithRelations>[] = [
+
   {
     id: "patient",
     accessorKey: "patient",
+    accessorFn: (row) => row.patient.name,
     header: "Paciente",
     cell: ({ row: { original: appointment } }) => {
       return `${appointment.patient.name}`;
@@ -36,6 +39,7 @@ export const appointmentsTableColumns: ColumnDef<AppointmentWithRelations>[] = [
   {
     id: "doctor",
     accessorKey: "doctor",
+    accessorFn: (row) => row.doctor.name,
     header: "Médico",
     cell: ({ row: { original: appointment } }) => {
       return `${appointment.doctor.name}`;
@@ -44,7 +48,10 @@ export const appointmentsTableColumns: ColumnDef<AppointmentWithRelations>[] = [
   {
     id: "date",
     accessorKey: "date",
-    header: "Data e Hora",
+    accessorFn: (row) => row.date,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Data e Hora" />
+    ),
     cell: ({ row: { original: appointment } }) => {
       return format(new Date(appointment.date), "dd/MM/yyyy 'às' HH:mm", {
         locale: ptBR,
