@@ -1,6 +1,10 @@
-import { Stethoscope } from "lucide-react";
+"use client";
+
+import { ArrowUpRight, Stethoscope } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface TopDoctorsProps {
@@ -14,11 +18,23 @@ interface TopDoctorsProps {
 }
 
 const TopDoctors = ({ doctors }: TopDoctorsProps) => {
+  const router = useRouter();
+
   return (
     <Card>
       <CardHeader className="mb-2 flex items-center gap-3">
         <Stethoscope className="text-muted-foreground" />
-        <CardTitle>Médicos</CardTitle>
+        <CardTitle className="flex-1">Médicos</CardTitle>
+
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => router.push("/doctors")}
+          className="cursor-pointer"
+        >
+          Ver todos
+          <ArrowUpRight />
+        </Button>
       </CardHeader>
 
       <CardContent>
@@ -26,7 +42,7 @@ const TopDoctors = ({ doctors }: TopDoctorsProps) => {
           {doctors.map((doctor) => (
             <div key={doctor.id} className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Avatar className="border-primary size-10 border shadow-md">
+                <Avatar className="border-primary size-12 border shadow-md">
                   {doctor.avatarImageUrl && (
                     <AvatarImage
                       src={doctor.avatarImageUrl}
