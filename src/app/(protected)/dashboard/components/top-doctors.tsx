@@ -1,6 +1,6 @@
 import { Stethoscope } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface TopDoctorsProps {
@@ -26,7 +26,14 @@ const TopDoctors = ({ doctors }: TopDoctorsProps) => {
           {doctors.map((doctor) => (
             <div key={doctor.id} className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Avatar className="size-10">
+                <Avatar className="border-primary size-10 border shadow-md">
+                  {doctor.avatarImageUrl && (
+                    <AvatarImage
+                      src={doctor.avatarImageUrl}
+                      alt="Imagem do Doutor"
+                      className="object-cover object-top"
+                    />
+                  )}
                   <AvatarFallback className="bg-gray-100 text-lg font-medium text-gray-600">
                     {doctor.name.charAt(0)}
                   </AvatarFallback>
