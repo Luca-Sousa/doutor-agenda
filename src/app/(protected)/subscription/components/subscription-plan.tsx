@@ -1,7 +1,7 @@
 "use client";
 
 import { loadStripe } from "@stripe/stripe-js";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 
@@ -11,15 +11,24 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface SubscriptionPlanProps {
-  active?: boolean;
+  activePlan?: string;
   className?: string;
   userEmail?: string;
+  plan: {
+    id: string;
+    name: string;
+    price: string;
+    description: string;
+    features: string[];
+    highlight: boolean;
+  };
 }
 
 export function SubscriptionPlan({
-  active = false,
+  activePlan,
   className,
   userEmail,
+  plan,
 }: SubscriptionPlanProps) {
   const router = useRouter();
 
@@ -42,15 +51,6 @@ export function SubscriptionPlan({
     },
   });
 
-  const features = [
-    "Cadastro de até 3 médicos",
-    "Agendamentos ilimitados",
-    "Métricas básicas",
-    "Cadastro de pacientes",
-    "Confirmação manual",
-    "Suporte via e-mail",
-  ];
-
   const handleSubscribeClick = () => {
     createStripeCheckoutAction.execute();
   };
@@ -61,53 +61,75 @@ export function SubscriptionPlan({
     );
   };
 
+  // Visual highlight for the recommended plan
+  const highlightStyles = plan.highlight
+    ? "border-2 border-primary shadow-xl scale-105"
+    : "border";
+
   return (
-    <Card className={className}>
-      <CardHeader>
+    <Card
+      className={`relative flex flex-col justify-between transition-all duration-200 hover:scale-[1.03] ${highlightStyles} ${className ?? ""}`}
+      style={{
+        background:
+          plan.highlight
+            ? "linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%)"
+            : "white",
+      }}
+    >
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-2xl font-bold text-gray-900">Essential</h3>
-          {active && (
-            <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+          <h3 className="text-2xl font-bold text-primary flex items-center gap-2">
+            {plan.name}
+            {plan.highlight && (
+              <Star className="w-5 h-5 text-yellow-400" />
+            )}
+          </h3>
+          {activePlan === plan.id && plan.id !== "free" && (
+            <Badge className="bg-green-100 text-green-700 border border-green-300">
               Atual
             </Badge>
           )}
         </div>
-        <p className="text-gray-600">
-          Para profissionais autônomos ou pequenas clínicas
-        </p>
-        <div className="flex items-baseline">
-          <span className="text-3xl font-bold text-gray-900">R$59</span>
-          <span className="ml-1 text-gray-600">/ mês</span>
+        <p className="text-gray-600 mt-1">{plan.description}</p>
+        <div className="flex items-end gap-1 mt-2">
+          <span className="text-4xl font-extrabold text-primary">{plan.price}</span>
+          <span className="text-base text-gray-500 mb-1">/ mês</span>
         </div>
       </CardHeader>
 
-      <CardContent>
-        <div className="space-y-4 border-t border-gray-200 pt-6">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-start">
-              <div className="flex-shrink-0">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
-              </div>
-              <p className="ml-3 text-gray-600">{feature}</p>
+      <CardContent className="flex flex-col justify-between flex-1">
+        <div className="space-y-3 border-t border-gray-200 pt-4">
+          {plan.features.map((feature, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <CheckCircle2 className="size-5 text-green-500" />
+              <span className="text-gray-700 text-sm">{feature}</span>
             </div>
           ))}
         </div>
 
         <div className="mt-8">
-          <Button
-            className="w-full cursor-pointer"
-            variant="outline"
-            onClick={active ? handleManagerPlanCLick : handleSubscribeClick}
-            disabled={createStripeCheckoutAction.isExecuting}
-          >
-            {createStripeCheckoutAction.isExecuting ? (
-              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-            ) : active ? (
-              "Gerenciar assinatura"
-            ) : (
-              "Fazer assinatura"
-            )}
-          </Button>
+          {plan.id === "premium" ? (
+            <Button className="w-full" variant="outline" disabled>
+              Em breve
+            </Button>
+          ) : plan.id !== "free" && (
+            <Button
+              className="w-full cursor-pointer"
+              variant={activePlan === plan.id ? "outline" : plan.highlight ? "default" : "secondary"}
+              onClick={
+                activePlan === plan.id ? handleManagerPlanCLick : handleSubscribeClick
+              }
+              disabled={createStripeCheckoutAction.isExecuting}
+            >
+              {createStripeCheckoutAction.isExecuting ? (
+                <Loader2 className="mr-1 size-4 animate-spin" />
+              ) : activePlan === plan.id ? (
+                "Gerenciar assinatura"
+              ) : (
+                "Fazer assinatura"
+              )}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
