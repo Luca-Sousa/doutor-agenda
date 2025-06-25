@@ -3,7 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { CalendarIcon, HandCoinsIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  HandCoinsIcon,
+  SquareArrowOutUpRightIcon,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -16,7 +21,8 @@ import CustomFormField, {
   FormFieldType,
 } from "@/components/form/custom-form-field";
 import SubmitButtonForm from "@/components/form/submit-button-form";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DialogContent,
   DialogDescription,
@@ -24,12 +30,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-} from "@/components/ui/form";
-import {
-  SelectItem,
-} from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
+import { SelectItem } from "@/components/ui/select";
 import { doctorsTable, patientsTable } from "@/db/schema";
 
 const formSchema = z.object({
@@ -63,6 +65,7 @@ const AddAppointmentForm = ({
   doctors,
   onSuccess,
 }: AddAppointmentFormProps) => {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     shouldUnregister: true,
     resolver: zodResolver(formSchema),
@@ -164,43 +167,80 @@ const AddAppointmentForm = ({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <CustomFormField
-            control={form.control}
-            fieldType={FormFieldType.SELECT}
-            name="patientId"
-            label="Paciente"
-            placeholder="Selecione um paciente"
-          >
-            {patients.map((patient) => (
-              <SelectItem key={patient.id} value={patient.id}>
-                <Avatar>
-                  <AvatarFallback className="uppercase">
-                    {patient.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                {patient.name}
-              </SelectItem>
-            ))}
-          </CustomFormField>
+          {patients.length > 0 ? (
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.SELECT}
+              name="patientId"
+              label="Paciente"
+              placeholder="Selecione um paciente"
+            >
+              {patients.map((patient) => (
+                <SelectItem key={patient.id} value={patient.id}>
+                  <Avatar>
+                    <AvatarFallback className="uppercase">
+                      {patient.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {patient.name}
+                </SelectItem>
+              ))}
+            </CustomFormField>
+          ) : (
+            <div className="flex justify-between gap-2 rounded border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
+              Nenhum paciente cadastrado. Cadastre um paciente para agendar.
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="cursor-pointer"
+                onClick={() => router.push("/patients")}
+              >
+                <SquareArrowOutUpRightIcon />
+              </Button>
+            </div>
+          )}
 
-          <CustomFormField
-            control={form.control}
-            fieldType={FormFieldType.SELECT}
-            name="doctorId"
-            label="Médico"
-            placeholder="Selecione um médico"
-          >
-            {doctors.map((doctor) => (
-              <SelectItem key={doctor.id} value={doctor.id}>
-                <Avatar>
-                  <AvatarFallback className="uppercase">
-                    {doctor.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                {doctor.name} - {doctor.specialty}
-              </SelectItem>
-            ))}
-          </CustomFormField>
+          {doctors.length > 0 ? (
+            <CustomFormField
+              control={form.control}
+              fieldType={FormFieldType.SELECT}
+              name="doctorId"
+              label="Médico"
+              placeholder="Selecione um médico"
+            >
+              {doctors.map((doctor) => (
+                <SelectItem key={doctor.id} value={doctor.id}>
+                  <Avatar>
+                    {doctor.avatarImageUrl && (
+                      <AvatarImage
+                        src={doctor.avatarImageUrl}
+                        alt="Imagem do Doutor"
+                        className="object-cover object-top"
+                      />
+                    )}
+                    <AvatarFallback className="uppercase">
+                      {doctor.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {doctor.name} - {doctor.specialty}
+                </SelectItem>
+              ))}
+            </CustomFormField>
+          ) : (
+            <div className="flex justify-between gap-2 rounded border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
+              Nenhum doutor cadastrado. Cadastre um doutor para agendar.
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="cursor-pointer"
+                onClick={() => router.push("/doctors")}
+              >
+                <SquareArrowOutUpRightIcon />
+              </Button>
+            </div>
+          )}
 
           <CustomFormField
             control={form.control}
@@ -243,7 +283,11 @@ const AddAppointmentForm = ({
           </CustomFormField>
 
           <DialogFooter>
-            <SubmitButtonForm isLoading={isLoading}>
+            <SubmitButtonForm
+              isLoading={isLoading}
+              // Desabilita se não houver pacientes ou doutores
+              disabled={patients.length === 0 || doctors.length === 0}
+            >
               <div className="flex items-center gap-2">
                 <CalendarIcon /> Criar agendamento
               </div>

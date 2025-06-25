@@ -6,18 +6,20 @@ interface SubmitButtonFormProps {
   isLoading: boolean;
   className?: string;
   children: React.ReactNode;
+  disabled?: boolean;
 }
 
 const SubmitButtonForm = ({
   isLoading,
   className,
   children,
+  disabled,
 }: SubmitButtonFormProps) => {
   return (
     <Button
       type="submit"
       className={className ?? "w-full cursor-pointer"}
-      disabled={isLoading}
+      disabled={isLoading || disabled}
     >
       {isLoading ? (
         <Image
