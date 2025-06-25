@@ -30,8 +30,8 @@ import { Form, FormControl } from "@/components/ui/form";
 import { SelectGroup, SelectItem, SelectLabel } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { medicalSpecialties, timeOptions, weekDays } from "@/contants";
-// import { useClinic } from "@/context/clinic-context";
 import { doctorsTable } from "@/db/schema";
+import { MAX_FILE_SIZE } from "@/lib/utils";
 
 const formSchema = z
   .object({
@@ -40,7 +40,21 @@ const formSchema = z
     }),
     avatarImageUrl: z
       .array(z.union([z.instanceof(File), z.string()]))
-      .optional(),
+      .optional()
+      .refine(
+        (files) =>
+          !files ||
+          files.length === 0 ||
+          files.every(
+            (file) =>
+              typeof file === "string" ||
+              (file instanceof File && file.size <= MAX_FILE_SIZE)
+          ),
+        {
+          message: "A imagem deve ter no máximo 10MB.",
+          path: ["avatarImageUrl"],
+        }
+      ),
     specialty: z.string().trim().min(1, {
       message: "Especialidade é obrigatória.",
     }),
@@ -167,7 +181,7 @@ const UpsertDoctorForm = ({
                 fieldType={FormFieldType.SKELETON}
                 control={form.control}
                 name="avatarImageUrl"
-                label="Imagem do Médico"
+                label="Imagem"
                 renderSkeleton={(field) => (
                   <FormControl>
                     <FileUploader

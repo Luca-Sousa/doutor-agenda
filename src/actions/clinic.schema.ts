@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { MAX_FILE_SIZE } from "@/lib/utils";
+
 export const upsertDoctorSchema = z
   .object({
     id: z.string().uuid().optional(),
@@ -8,7 +10,21 @@ export const upsertDoctorSchema = z
     }),
     avatarImageUrl: z
       .array(z.union([z.instanceof(File), z.string()]))
-      .optional(),
+      .optional()
+      .refine(
+        (files) =>
+          !files ||
+          files.length === 0 ||
+          files.every(
+            (file) =>
+              typeof file === "string" ||
+              (file instanceof File && file.size <= MAX_FILE_SIZE),
+          ),
+        {
+          message: "A imagem deve ter no máximo 10MB.",
+          path: ["avatarImageUrl"],
+        },
+      ),
     specialty: z.string().trim().min(1, {
       message: "Especialidade é obrigatória.",
     }),

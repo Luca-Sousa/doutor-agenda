@@ -4,6 +4,9 @@ import { CloudUploadIcon } from "lucide-react";
 import Image from "next/image";
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { toast } from "sonner";
+
+import { MAX_FILE_SIZE } from "@/lib/utils";
 
 type FileOrUrl = File | string;
 
@@ -31,6 +34,16 @@ const FileUploader = ({ files, onChange }: FileUploaderProps) => {
     onDrop,
     accept: { "image/*": [] },
     multiple: false,
+    maxSize: MAX_FILE_SIZE,
+    onDropRejected: (fileRejections) => {
+      fileRejections.forEach((rejection) => {
+        rejection.errors.forEach((error) => {
+          if (error.code === "file-too-large") {
+            toast.error("A imagem deve ter no máximo 10MB.");
+          }
+        });
+      });
+    },
   });
 
   return (
@@ -50,12 +63,14 @@ const FileUploader = ({ files, onChange }: FileUploaderProps) => {
       ) : (
         <>
           <CloudUploadIcon size={40} className="text-primary" />
-          <p className="text-dark-600 max-w-32 gap-2 text-center text-xs">
+          <p className="text-accent-foreground max-w-32 gap-2 text-center text-sm">
             <span className="text-primary font-semibold">
               Click para fazer upload
             </span>{" "}
             ou arraste e solte a imagem aqui
           </p>
+
+          <span className="text-center max-w-32 text-xs text-muted-foreground">A imagem deve ter no máximo 10MB.</span>
         </>
       )}
     </div>
