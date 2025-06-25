@@ -32,7 +32,6 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { doctorsTable } from "@/db/schema";
 import { getAvailability } from "@/helpers/availability";
 import { formatCurrencyInCents } from "@/helpers/currency";
@@ -81,8 +80,8 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h3 className="text-primary text-xl font-bold">{doctor.name}</h3>
-          <p className="text-muted-foreground text-base">{doctor.specialty}</p>
+          <h3 className="text-primary text-lg font-bold">{doctor.name}</h3>
+          <p className="text-muted-foreground">{doctor.specialty}</p>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 pt-0">
@@ -114,7 +113,6 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
           </Badge>
         </div>
       </CardContent>
-      <Separator />
       <CardFooter className="flex gap-2 pt-3">
         <Dialog open={isUpsertDialogOpen} onOpenChange={setIsUpsertDialogOpen}>
           <DialogTrigger asChild>
